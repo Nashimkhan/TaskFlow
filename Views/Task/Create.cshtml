@@ -1,0 +1,81 @@
+﻿@model TaskFlow.Models.TaskItem
+
+@{
+    ViewData["Title"] = "Create Task";
+}
+
+<link href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" rel="stylesheet">
+
+<div class="d-flex justify-content-center align-items-center" style="min-height:80vh;">
+
+    <div class="card shadow-lg p-4" style="width:500px; border-radius:15px;">
+
+        <h4 class="fw-bold mb-4 text-center">➕ Create New Task</h4>
+
+        <form method="post">
+
+            
+            <div class="form-floating mb-3">
+                <input asp-for="Title" class="form-control" placeholder="Title" />
+                <label>Task Title</label>
+            </div>
+            <span asp-validation-for="Title" class="text-danger"></span>
+
+            
+            <div class="form-floating mb-3">
+                <textarea asp-for="Description" class="form-control" placeholder="Description" style="height:100px"></textarea>
+                <label>Description</label>
+            </div>
+
+            
+            <div class="mb-3">
+                <label class="form-label">Status</label>
+                <select asp-for="Status" class="form-select">
+                    <option value="">-- Select Status --</option>
+                    <option>Pending</option>
+                    <option>Done</option>
+                </select>
+            </div>
+            <span asp-validation-for="Status" class="text-danger"></span>
+
+            
+            <div class="mb-3">
+                <label class="form-label">Priority</label>
+                <select asp-for="Priority" class="form-select">
+                    <option>Low</option>
+                    <option>Medium</option>
+                    <option>High</option>
+                </select>
+            </div>
+
+            
+            <div class="mb-3">
+                <label class="form-label">Due Date</label>
+                <input asp-for="DueDate" id="datePicker" class="form-control" placeholder="Select date" />
+            </div>
+            <span asp-validation-for="DueDate" class="text-danger"></span>
+
+            
+            <div class="d-flex justify-content-between mt-4">
+                <a href="/Task" class="btn btn-outline-secondary">Cancel</a>
+                <button class="btn btn-success">Save Task</button>
+            </div>
+
+        </form>
+
+    </div>
+</div>
+
+':oik'
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
+<script>
+    flatpickr("#datePicker", {
+    dateFormat: "Y-m-d",
+    minDate: "today"
+    });
+</script>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

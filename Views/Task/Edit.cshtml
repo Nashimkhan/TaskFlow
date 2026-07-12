@@ -1,0 +1,47 @@
+﻿@model TaskFlow.Models.TaskItem
+
+<div class="card shadow p-4" style="max-width:600px; margin:auto;">
+
+    <h4 class="mb-4">Edit Task</h4>
+
+    <form method="post">
+
+        <input type="hidden" asp-for="Id" />
+
+        <div class="mb-3">
+            <label>Title</label>
+            <input asp-for="Title" class="form-control" />
+        </div>
+
+        <div class="mb-3">
+            <label>Description</label>
+            <textarea asp-for="Description" class="form-control"></textarea>
+        </div>
+
+        <div class="mb-3">
+            <label>Status</label>
+            <select asp-for="Status" class="form-select">
+                <option>Pending</option>
+                <option>Done</option>
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label>Priority</label>
+            <select asp-for="Priority" class="form-select">
+                <option>Low</option>
+                <option>Medium</option>
+                <option>High</option>
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label>Due Date</label>
+            <input asp-for="DueDate" type="date" class="form-control" />
+        </div>
+
+        <button class="btn btn-primary">Update</button>
+        <a href="/Task" class="btn btn-secondary">Cancel</a>
+
+    </form>
+</div>
