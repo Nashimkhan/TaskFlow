@@ -4,130 +4,308 @@
     ViewData["Title"] = "Dashboard";
 }
 
-<!-- ✅ SUCCESS MESSAGE -->
 @if (TempData["Success"] != null)
 {
     <div class="alert alert-success alert-dismissible fade show" role="alert">
         @TempData["Success"]
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+
+        <button type="button"
+                class="btn-close"
+                data-bs-dismiss="alert">
+        </button>
     </div>
 }
 
-<!-- 📊 DASHBOARD -->
+
 <div class="row mb-4">
-    <div class="col-md-4">
-        <div class="card shadow-sm p-3 text-center">
+
+    <div class="col-md-3 mb-3">
+        <div class="card shadow-sm p-3 text-center h-100">
             <h6 class="text-muted">Total Tasks</h6>
             <h3 class="fw-bold">@ViewBag.TotalTasks</h3>
         </div>
     </div>
 
-    <div class="col-md-4">
-        <div class="card shadow-sm p-3 text-center">
+    <div class="col-md-3 mb-3">
+        <div class="card shadow-sm p-3 text-center h-100">
             <h6 class="text-muted">Completed</h6>
-            <h3 class="fw-bold text-success">@ViewBag.CompletedTasks</h3>
+            <h3 class="fw-bold text-success">
+                @ViewBag.CompletedTasks
+            </h3>
         </div>
     </div>
 
-    <div class="col-md-4">
-        <div class="card shadow-sm p-3 text-center">
+    <div class="col-md-3 mb-3">
+        <div class="card shadow-sm p-3 text-center h-100">
             <h6 class="text-muted">Pending</h6>
-            <h3 class="fw-bold text-warning">@ViewBag.PendingTasks</h3>
+            <h3 class="fw-bold text-warning">
+                @ViewBag.PendingTasks
+            </h3>
         </div>
     </div>
+
+    <div class="col-md-3 mb-3">
+        <div class="card shadow-sm p-3 text-center h-100">
+            <h6 class="text-muted">Overdue</h6>
+            <h3 class="fw-bold text-danger">
+                @ViewBag.OverdueTasks
+            </h3>
+        </div>
+    </div>
+
 </div>
 
-<!-- 🔍 SEARCH + FILTER -->
+
 <form method="get" class="row mb-4">
-    <div class="col-md-4">
-        <input type="text" name="search" class="form-control" placeholder="🔍 Search tasks..." />
+
+    <div class="col-md-4 mb-2">
+        <input type="text"
+               name="search"
+               value="@ViewBag.Search"
+               class="form-control"
+               placeholder="Search tasks..." />
     </div>
 
-    <div class="col-md-3">
+    <div class="col-md-3 mb-2">
         <select name="status" class="form-select">
+
             <option value="">All Status</option>
-            <option>Pending</option>
-            <option>Done</option>
+
+            <option value="Pending"
+                    selected="@(ViewBag.Status == "Pending")">
+                Pending
+            </option>
+
+            <option value="Done"
+                    selected="@(ViewBag.Status == "Done")">
+                Done
+            </option>
+
         </select>
     </div>
 
-    <div class="col-md-3">
+    <div class="col-md-3 mb-2">
         <select name="priority" class="form-select">
+
             <option value="">All Priority</option>
-            <option>Low</option>
-            <option>Medium</option>
-            <option>High</option>
+
+            <option value="Low"
+                    selected="@(ViewBag.Priority == "Low")">
+                Low
+            </option>
+
+            <option value="Medium"
+                    selected="@(ViewBag.Priority == "Medium")">
+                Medium
+            </option>
+
+            <option value="High"
+                    selected="@(ViewBag.Priority == "High")">
+                High
+            </option>
+
         </select>
     </div>
 
-    <div class="col-md-2">
-        <button class="btn btn-primary w-100">Apply</button>
+    <div class="col-md-2 mb-2">
+        <button class="btn btn-primary w-100">
+            Apply
+        </button>
     </div>
+
 </form>
 
-<!-- HEADER -->
 <div class="d-flex justify-content-between align-items-center mb-4">
+
     <div>
         <h3 class="fw-bold">Dashboard</h3>
-        <p class="text-muted">Manage your tasks efficiently</p>
+        <p class="text-muted">
+            Manage your tasks efficiently
+        </p>
     </div>
 
-    <a href="/Task/Create" class="btn btn-primary">+ New Task</a>
+    <div class="d-flex gap-2">
+
+        @if (User.IsInRole("Admin"))
+        {
+            <a asp-controller="Admin"
+               asp-action="Index"
+               class="btn btn-dark">
+                Admin Dashboard
+            </a>
+        }
+
+        <a asp-controller="Task"
+           asp-action="Create"
+           class="btn btn-primary">
+            + New Task
+        </a>
+
+    </div>
+
 </div>
 
-<!-- 🧾 TASK CARDS -->
+
 <div class="row">
+
     @foreach (var task in Model)
     {
+        var isOverdue =
+            task.Status != "Done" &&
+            task.DueDate.Date < DateTime.UtcNow.Date;
+
         <div class="col-md-4 mb-4">
+
             <div class="card shadow-sm p-3 h-100">
 
-                <!-- TITLE + STATUS -->
-                <div class="d-flex justify-content-between">
-                    <h5 class="fw-semibold">@task.Title</h5>
+                <div class="d-flex justify-content-between align-items-start">
 
-                    <span class="badge bg-@(task.Status == "Done" ? "success" : "warning")">
-                        @task.Status
-                    </span>
+                    <h5 class="fw-semibold">
+                        @task.Title
+                    </h5>
+
+                    <div class="text-end">
+
+                        <span class="badge bg-@(task.Status == "Done" ? "success" : "warning")">
+                            @task.Status
+                        </span>
+
+                        @if (isOverdue)
+                        {
+                            <span class="badge bg-danger">
+                                Overdue
+                            </span>
+                        }
+
+                    </div>
+
                 </div>
 
-                <!-- DESCRIPTION -->
                 <p class="text-muted small mt-2">
-                    @(string.IsNullOrEmpty(task.Description) ? "No description" : task.Description)
+
+                    @(string.IsNullOrEmpty(task.Description)
+                        ? "No description"
+                        : task.Description)
+
                 </p>
 
-                <!-- PRIORITY + DATE -->
                 <div class="mt-2">
-                    <span class="badge bg-@(task.Priority == "High" ? "danger" : task.Priority == "Medium" ? "info" : "secondary")">
+
+                    <span class="badge bg-@(task.Priority == "High"
+                                                  ? "danger"
+                                                  : task.Priority == "Medium"
+                                                      ? "info"
+                                                      : "secondary")">
+
                         @task.Priority
+
                     </span>
 
-                    <small class="text-muted ms-2">
-                        📅 @task.DueDate.ToShortDateString()
+                    <small class="@(isOverdue ? "text-danger fw-semibold" : "text-muted") ms-2">
+                        @task.DueDate.ToShortDateString()
                     </small>
+
                 </div>
 
-                <!-- ACTIONS -->
                 <div class="mt-3 d-flex justify-content-end gap-2">
-                    <a href="/Task/Edit/@task.Id" class="btn btn-sm btn-outline-primary">Edit</a>
 
-                    <form method="post" action="/Task/Delete/@task.Id"
-                          onsubmit="return confirm('⚠️ Delete this task?');">
-                        <button type="submit" class="btn btn-sm btn-outline-danger">
+                    <a asp-controller="Task"
+                       asp-action="Edit"
+                       asp-route-id="@task.Id"
+                       class="btn btn-sm btn-outline-primary">
+                        Edit
+                    </a>
+
+                    <form asp-controller="Task"
+                          asp-action="Delete"
+                          asp-route-id="@task.Id"
+                          method="post"
+                          onsubmit="return confirm('Delete this task?');">
+
+                        @Html.AntiForgeryToken()
+
+                        <button type="submit"
+                                class="btn btn-sm btn-outline-danger">
                             Delete
                         </button>
+
                     </form>
+
                 </div>
 
             </div>
+
         </div>
     }
+
 </div>
 
-<!-- ⏱ AUTO HIDE ALERT -->
+
+@if (ViewBag.TotalPages > 1)
+{
+    <nav class="mt-3">
+
+        <ul class="pagination justify-content-center">
+
+            @if (ViewBag.CurrentPage > 1)
+            {
+                <li class="page-item">
+
+                    <a class="page-link"
+                       asp-action="Index"
+                       asp-route-page="@(ViewBag.CurrentPage - 1)"
+                       asp-route-search="@ViewBag.Search"
+                       asp-route-status="@ViewBag.Status"
+                       asp-route-priority="@ViewBag.Priority">
+                        Previous
+                    </a>
+
+                </li>
+            }
+
+            @for (int i = 1; i <= ViewBag.TotalPages; i++)
+            {
+                <li class="page-item @(i == ViewBag.CurrentPage ? "active" : "")">
+
+                    <a class="page-link"
+                       asp-action="Index"
+                       asp-route-page="@i"
+                       asp-route-search="@ViewBag.Search"
+                       asp-route-status="@ViewBag.Status"
+                       asp-route-priority="@ViewBag.Priority">
+                        @i
+                    </a>
+
+                </li>
+            }
+
+            @if (ViewBag.CurrentPage < ViewBag.TotalPages)
+            {
+                <li class="page-item">
+
+                    <a class="page-link"
+                       asp-action="Index"
+                       asp-route-page="@(ViewBag.CurrentPage + 1)"
+                       asp-route-search="@ViewBag.Search"
+                       asp-route-status="@ViewBag.Status"
+                       asp-route-priority="@ViewBag.Priority">
+                        Next
+                    </a>
+
+                </li>
+            }
+
+        </ul>
+
+    </nav>
+}
+
 <script>
     setTimeout(() => {
         const alert = document.querySelector(".alert");
-        if (alert) alert.remove();
+
+        if (alert) {
+            alert.remove();
+        }
     }, 2000);
 </script>

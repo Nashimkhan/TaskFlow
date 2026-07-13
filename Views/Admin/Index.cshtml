@@ -1,0 +1,137 @@
+﻿@model List<Microsoft.AspNetCore.Identity.IdentityUser>
+
+@{
+    ViewData["Title"] = "Admin Dashboard";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="fw-bold">👑 Admin Dashboard</h2>
+        <p class="text-muted">Manage users and monitor TaskFlow</p>
+    </div>
+
+    <a asp-controller="Task"
+       asp-action="Index"
+       class="btn btn-outline-primary">
+        ← My Dashboard
+    </a>
+</div>
+
+<div class="row mb-4">
+
+    <div class="col-md-3 mb-3">
+        <div class="card shadow-sm p-3 text-center h-100">
+            <h6 class="text-muted">Total Users</h6>
+            <h2 class="fw-bold text-primary">
+                @ViewBag.TotalUsers
+            </h2>
+        </div>
+    </div>
+
+    <div class="col-md-3 mb-3">
+        <div class="card shadow-sm p-3 text-center h-100">
+            <h6 class="text-muted">Total Tasks</h6>
+            <h2 class="fw-bold">
+                @ViewBag.TotalTasks
+            </h2>
+        </div>
+    </div>
+
+    <div class="col-md-3 mb-3">
+        <div class="card shadow-sm p-3 text-center h-100">
+            <h6 class="text-muted">Completed</h6>
+            <h2 class="fw-bold text-success">
+                @ViewBag.CompletedTasks
+            </h2>
+        </div>
+    </div>
+
+    <div class="col-md-3 mb-3">
+        <div class="card shadow-sm p-3 text-center h-100">
+            <h6 class="text-muted">Pending</h6>
+            <h2 class="fw-bold text-warning">
+                @ViewBag.PendingTasks
+            </h2>
+        </div>
+    </div>
+
+</div>
+
+<div class="card shadow-sm">
+
+    <div class="card-body">
+
+        <h4 class="fw-bold mb-3">Registered Users</h4>
+
+        <div class="table-responsive">
+
+            <table class="table table-hover align-middle">
+
+                <thead>
+                    <tr>
+                        <th>Username</th>
+                        <th>Email</th>
+                        <th>User ID</th>
+                        <th class="text-end">Action</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    @foreach (var user in Model)
+                    {
+                        <tr>
+                            <td>
+                                <div class="d-flex align-items-center gap-2">
+
+                                    <div class="rounded-circle bg-primary text-white
+                                        d-flex justify-content-center
+                                        align-items-center"
+                                         style="width:35px;height:35px;">
+
+                                        @(user.UserName?.Substring(0, 1).ToUpper())
+
+                                    </div>
+
+                                    <strong>@user.UserName</strong>
+
+                                </div>
+                            </td>
+
+                            <td>
+                                @(string.IsNullOrEmpty(user.Email)
+                                    ? "Not provided"
+                                    : user.Email)
+                            </td>
+
+                            <td>
+                                <small class="text-muted">
+                                    @user.Id
+                                </small>
+                            </td>
+
+                            <td class="text-end">
+
+                                <a asp-controller="Admin"
+                                   asp-action="UserTasks"
+                                   asp-route-id="@user.Id"
+                                   class="btn btn-sm btn-primary">
+
+                                    View Tasks
+
+                                </a>
+
+                            </td>
+
+                        </tr>
+                    }
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</div>

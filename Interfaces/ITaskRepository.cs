@@ -4,18 +4,16 @@ namespace TaskFlow.Interfaces
 {
     public interface ITaskRepository
     {
-        List<TaskItem> GetAll(int userId);
+        List<TaskItem> GetAll(string userId);
 
-        TaskItem GetById(int id, int userId);
+        TaskItem? GetById(int id, string userId);
 
-        List<TaskItem> Search(int userId, string query);
+        List<TaskItem> Search(string userId, string query);
 
         void Add(TaskItem task);
 
         void Update(TaskItem task);
 
         void Delete(TaskItem task);
-
-
     }
 }

@@ -1,4 +1,6 @@
-﻿namespace TaskFlow.Models
+﻿using Microsoft.AspNetCore.Identity;
+
+namespace TaskFlow.Models
 {
     public class TaskItem
     {
@@ -14,8 +16,10 @@
 
         public string Priority { get; set; } = "Medium";
 
-        public int UserId { get; set; }
+        public string UserId { get; set; } = string.Empty;
 
-        public DateTime CreatedAt { get; set; }  
+        public IdentityUser? User { get; set; }
+
+        public DateTime CreatedAt { get; set; }
     }
 }

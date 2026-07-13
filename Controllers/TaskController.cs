@@ -1,178 +1,164 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using TaskFlow.Interfaces;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using TaskFlow.Models;
+using TaskFlow.Services.Interfaces;
 
 namespace TaskFlow.Controllers
 {
+    [Authorize]
     public class TaskController : Controller
     {
-        private readonly ITaskRepository _taskRepo;
+        private readonly ITaskService _taskService;
+        private readonly UserManager<IdentityUser> _userManager;
 
-        public TaskController(ITaskRepository taskRepo)
+        public TaskController(
+            ITaskService taskService,
+            UserManager<IdentityUser> userManager)
         {
-            _taskRepo = taskRepo;
+            _taskService = taskService;
+            _userManager = userManager;
         }
 
-        
-        private bool IsLoggedIn()
+        private string GetUserId()
         {
-            return HttpContext.Session.GetInt32("UserId") != null;
+            return _userManager.GetUserId(User)
+                ?? throw new UnauthorizedAccessException();
         }
 
-       
-        private DateTime ToUtc(DateTime date)
+        public IActionResult Index(
+            string? search,
+            string? status,
+            string? priority,
+            int page = 1)
         {
-            return DateTime.SpecifyKind(date, DateTimeKind.Utc);
-        }
+            const int pageSize = 6;
 
-       
-        public IActionResult Index(string? search, string? status, string? priority)
-        {
-            if (!IsLoggedIn())
-                return RedirectToAction("Index", "Home");
-
-            var userId = HttpContext.Session.GetInt32("UserId")!.Value;
-
-            var tasks = _taskRepo.GetAll(userId);
-
-            
-            if (!string.IsNullOrWhiteSpace(search))
+            if (page < 1)
             {
-                var lower = search.ToLower();
-
-                tasks = tasks
-                    .Where(t =>
-                        (t.Title != null && t.Title.ToLower().Contains(lower)) ||
-                        (t.Description != null && t.Description.ToLower().Contains(lower))
-                    )
-                    .ToList();
+                page = 1;
             }
 
-           
-            if (!string.IsNullOrWhiteSpace(status))
-            {
-                tasks = tasks
-                    .Where(t => t.Status == status)
-                    .ToList();
-            }
+            var tasks = _taskService.GetUserTasks(
+                GetUserId(),
+                search,
+                status,
+                priority);
 
-           
-            if (!string.IsNullOrWhiteSpace(priority))
-            {
-                tasks = tasks
-                    .Where(t => t.Priority == priority)
-                    .ToList();
-            }
-
-           
             ViewBag.TotalTasks = tasks.Count;
-            ViewBag.CompletedTasks = tasks.Count(t => t.Status == "Done");
-            ViewBag.PendingTasks = tasks.Count(t => t.Status != "Done");
 
-            return View(tasks);
+            ViewBag.CompletedTasks =
+                tasks.Count(t => t.Status == "Done");
+
+            ViewBag.PendingTasks =
+                tasks.Count(t => t.Status != "Done");
+
+            ViewBag.OverdueTasks =
+                tasks.Count(t =>
+                    t.Status != "Done" &&
+                    t.DueDate.Date < DateTime.UtcNow.Date);
+
+            ViewBag.TotalPages =
+                (int)Math.Ceiling(
+                    tasks.Count / (double)pageSize);
+
+            if (ViewBag.TotalPages > 0 &&
+                page > ViewBag.TotalPages)
+            {
+                page = ViewBag.TotalPages;
+            }
+
+            ViewBag.CurrentPage = page;
+
+            ViewBag.Search = search;
+            ViewBag.Status = status;
+            ViewBag.Priority = priority;
+
+            var pagedTasks = _taskService.GetPagedTasks(
+                tasks,
+                page,
+                pageSize);
+
+            return View(pagedTasks);
         }
 
-       
         public IActionResult Create()
         {
-            if (!IsLoggedIn())
-                return RedirectToAction("Index", "Home");
-
             return View();
         }
 
-       
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public IActionResult Create(TaskItem task)
         {
-            if (!IsLoggedIn())
-                return RedirectToAction("Index", "Home");
-
             if (!ModelState.IsValid)
+            {
                 return View(task);
+            }
 
-            var userId = HttpContext.Session.GetInt32("UserId")!.Value;
+            _taskService.CreateTask(
+                task,
+                GetUserId());
 
-            
-            task.CreatedAt = ToUtc(DateTime.UtcNow);
-            task.DueDate = ToUtc(task.DueDate);
-
-            task.UserId = userId;
-
-            _taskRepo.Add(task);
-
-            
-            TempData["Success"] = "Task created successfully!";
+            TempData["Success"] =
+                "Task created successfully!";
 
             return RedirectToAction("Index");
         }
 
-        
         public IActionResult Edit(int id)
         {
-            if (!IsLoggedIn())
-                return RedirectToAction("Index", "Home");
-
-            var userId = HttpContext.Session.GetInt32("UserId")!.Value;
-
-            var task = _taskRepo.GetById(id, userId);
+            var task = _taskService.GetTaskById(
+                id,
+                GetUserId());
 
             if (task == null)
+            {
                 return NotFound();
+            }
 
             return View(task);
         }
 
-        
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public IActionResult Edit(TaskItem task)
         {
-            if (!IsLoggedIn())
-                return RedirectToAction("Index", "Home");
-
             if (!ModelState.IsValid)
+            {
                 return View(task);
+            }
 
-            var userId = HttpContext.Session.GetInt32("UserId")!.Value;
+            var updated = _taskService.UpdateTask(
+                task,
+                GetUserId());
 
-            var existingTask = _taskRepo.GetById(task.Id, userId);
-
-            if (existingTask == null)
+            if (!updated)
+            {
                 return NotFound();
+            }
 
-            
-            existingTask.Title = task.Title;
-            existingTask.Description = task.Description;
-            existingTask.Status = task.Status;
-            existingTask.Priority = task.Priority;
-            existingTask.DueDate = ToUtc(task.DueDate);
-
-            _taskRepo.Update(existingTask);
-
-           
-            TempData["Success"] = "Task updated successfully!";
+            TempData["Success"] =
+                "Task updated successfully!";
 
             return RedirectToAction("Index");
         }
 
-        
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public IActionResult Delete(int id)
         {
-            if (!IsLoggedIn())
-                return RedirectToAction("Index", "Home");
+            var deleted = _taskService.DeleteTask(
+                id,
+                GetUserId());
 
-            var userId = HttpContext.Session.GetInt32("UserId")!.Value;
-
-            var task = _taskRepo.GetById(id, userId);
-
-            if (task == null)
+            if (!deleted)
+            {
                 return NotFound();
+            }
 
-            _taskRepo.Delete(task);
-
-           
-            TempData["Success"] = "Task deleted successfully!";
+            TempData["Success"] =
+                "Task deleted successfully!";
 
             return RedirectToAction("Index");
         }

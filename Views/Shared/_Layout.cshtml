@@ -39,7 +39,7 @@
         <div class="ms-auto d-flex align-items-center">
 
             @{
-                var username = Context.Session.GetString("Username");
+                var username = User.Identity?.Name;
             }
 
             @if (!string.IsNullOrEmpty(username))

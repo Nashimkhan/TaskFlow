@@ -1,110 +1,112 @@
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using TaskFlow.Interfaces;
-using TaskFlow.Models;
 
 namespace TaskFlow.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly IUserRepository _userRepo;
+        private readonly UserManager<IdentityUser> _userManager;
+        private readonly SignInManager<IdentityUser> _signInManager;
 
-        public HomeController(IUserRepository userRepo)
+        public HomeController(
+            UserManager<IdentityUser> userManager,
+            SignInManager<IdentityUser> signInManager)
         {
-            _userRepo = userRepo;
+            _userManager = userManager;
+            _signInManager = signInManager;
         }
 
-        
         public IActionResult Index()
         {
+            if (User.Identity?.IsAuthenticated == true)
+            {
+                return RedirectToAction("Index", "Task");
+            }
+
             return View();
         }
 
-        
-        private string Clean(string? input)
-        {
-            return input?.Trim() ?? string.Empty;
-        }
-
-        
-        private bool IsInvalid(string username, string password)
-        {
-            return string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password);
-        }
-
-        
         [HttpPost]
-        public IActionResult Register(string? username, string? password)
+        public async Task<IActionResult> Register(
+            string? username,
+            string? password)
         {
-            username = Clean(username);
-            password = Clean(password);
+            username = username?.Trim();
+            password = password?.Trim();
 
-           
-            if (IsInvalid(username, password))
+            if (string.IsNullOrWhiteSpace(username) ||
+                string.IsNullOrWhiteSpace(password))
             {
                 ViewBag.Error = "All fields are required";
                 return View("Index");
             }
 
-            
-            if (_userRepo.GetByUsername(username) != null)
+            var existingUser = await _userManager.FindByNameAsync(username);
+
+            if (existingUser != null)
             {
                 ViewBag.Error = "Username already exists";
                 return View("Index");
             }
 
-           
-            var newUser = new User
+            var user = new IdentityUser
             {
-                Username = username,
-                Password = BCrypt.Net.BCrypt.HashPassword(password),
-                CreatedAt = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Utc)
+                UserName = username
             };
 
-            _userRepo.Add(newUser);
+            var result = await _userManager.CreateAsync(user, password);
 
-            
-            TempData["Success"] = "Account created successfully! Please login.";
+            if (!result.Succeeded)
+            {
+                ViewBag.Error = string.Join(
+                    ", ",
+                    result.Errors.Select(e => e.Description));
+
+                return View("Index");
+            }
+            await _userManager.AddToRoleAsync(user, "User");
+
+            TempData["Success"] =
+                "Account created successfully! Please login.";
 
             return RedirectToAction("Index");
         }
 
-       
         [HttpPost]
-        public IActionResult Login(string? username, string? password)
+        public async Task<IActionResult> Login(
+            string? username,
+            string? password)
         {
-            username = Clean(username);
-            password = Clean(password);
+            username = username?.Trim();
+            password = password?.Trim();
 
-            
-            if (IsInvalid(username, password))
+            if (string.IsNullOrWhiteSpace(username) ||
+                string.IsNullOrWhiteSpace(password))
             {
                 ViewBag.Error = "Please enter username and password";
                 return View("Index");
             }
 
-            var dbUser = _userRepo.GetByUsername(username);
+            var result = await _signInManager.PasswordSignInAsync(
+                username,
+                password,
+                isPersistent: false,
+                lockoutOnFailure: false);
 
-            
-            if (dbUser == null || !BCrypt.Net.BCrypt.Verify(password, dbUser.Password))
+            if (!result.Succeeded)
             {
                 ViewBag.Error = "Invalid username or password";
                 return View("Index");
             }
 
-            
-            HttpContext.Session.SetInt32("UserId", dbUser.Id);
-            HttpContext.Session.SetString("Username", dbUser.Username);
-
-            
-            TempData["Success"] = "Welcome back, " + dbUser.Username + "!";
+            TempData["Success"] = "Welcome back, " + username + "!";
 
             return RedirectToAction("Index", "Task");
         }
 
-        
-        public IActionResult Logout()
+        public async Task<IActionResult> Logout()
         {
-            HttpContext.Session.Clear();
+            await _signInManager.SignOutAsync();
 
             TempData["Success"] = "Logged out successfully";
 
