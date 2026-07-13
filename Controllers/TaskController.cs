@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using TaskFlow.Models;
 using TaskFlow.Services.Interfaces;
+using TaskFlow.Services.Implementations;
 
 namespace TaskFlow.Controllers
 {
@@ -11,13 +12,17 @@ namespace TaskFlow.Controllers
     {
         private readonly ITaskService _taskService;
         private readonly UserManager<IdentityUser> _userManager;
+        private readonly GroqAiService _groqAiService;
+
 
         public TaskController(
-            ITaskService taskService,
-            UserManager<IdentityUser> userManager)
+              ITaskService taskService,
+            UserManager<IdentityUser> userManager,
+            GroqAiService groqAiService)
         {
             _taskService = taskService;
             _userManager = userManager;
+            _groqAiService = groqAiService;
         }
 
         private string GetUserId()
@@ -162,5 +167,89 @@ namespace TaskFlow.Controllers
 
             return RedirectToAction("Index");
         }
+
+        [HttpGet]
+        public IActionResult AiBreakdown()
+        {
+            return View();
+        }
+
+        // ==============================
+        // AI TASK ASSISTANT
+        // ==============================
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AiBreakdown(string goal)
+        {
+            if (string.IsNullOrWhiteSpace(goal))
+            {
+                ViewBag.Error = "Please enter your goal.";
+
+                return View();
+            }
+
+            try
+            {
+                var suggestions =
+                    await _groqAiService.GenerateTasksAsync(goal);
+
+                ViewBag.Goal = goal;
+
+                return View(suggestions);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+
+                ViewBag.Error =
+                    "Unable to contact AI service.";
+
+                return View();
+            }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult AddAiTasks(
+    List<AiSuggestedTask> tasks,
+    List<int>? selectedTasks)
+        {
+            if (selectedTasks == null || selectedTasks.Count == 0)
+            {
+                TempData["Error"] =
+                    "Please select at least one task.";
+
+                return RedirectToAction("AiBreakdown");
+            }
+
+            foreach (var index in selectedTasks)
+            {
+                if (index < 0 || index >= tasks.Count)
+                    continue;
+
+                var aiTask = tasks[index];
+
+                _taskService.CreateTask(
+                    new TaskItem
+                    {
+                        Title = aiTask.Title,
+                        Description = aiTask.Description,
+                        Priority = aiTask.Priority,
+                        Status = "Pending",
+                        DueDate = aiTask.SuggestedDueDate
+                    },
+                    GetUserId());
+            }
+
+            TempData["Success"] =
+                "AI tasks added successfully!";
+
+            return RedirectToAction("Index");
+        }
+
+
     }
+
+
 }

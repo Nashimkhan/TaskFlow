@@ -7,252 +7,588 @@
     ViewData["Title"] = "Admin Dashboard";
 }
 
-<div class="d-flex justify-content-between align-items-center mb-4">
+<style>
+    .admin-page {
+        max-width: 1320px;
+        width: calc(100% - 40px);
+        margin: 0 auto;
+        padding: 45px 0 80px;
+    }
 
-    <div>
-        <h2 class="fw-bold">
-            👑 Admin Dashboard
-        </h2>
+    .admin-header h1 {
+        color: #111827;
+        font-size: 38px;
+        font-weight: 800;
+        letter-spacing: -1.5px;
+    }
 
-        <p class="text-muted">
-            Manage users and monitor TaskFlow
-        </p>
-    </div>
+    .admin-header p {
+        color: #6b7280;
+        margin: 0;
+    }
 
-    <a asp-controller="Task"
-       asp-action="Index"
-       class="btn btn-outline-primary">
+    .admin-label {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        padding: 7px 12px;
+        margin-bottom: 15px;
+        color: #7c3aed;
+        background: #f5f3ff;
+        border-radius: 100px;
+        font-size: 12px;
+        font-weight: 700;
+    }
 
-        ← My Dashboard
+    .admin-stat {
+        height: 100%;
+        padding: 24px;
+        background: #ffffff;
+        border: 1px solid #e5e7eb;
+        border-radius: 14px;
+        transition: .25s;
+    }
 
-    </a>
+        .admin-stat:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, .05);
+        }
 
-</div>
+    .stat-icon {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 42px;
+        height: 42px;
+        border-radius: 10px;
+        font-size: 19px;
+    }
 
-@if (TempData["Success"] != null)
-{
-    <div class="alert alert-success notification">
-        ✓ @TempData["Success"]
-    </div>
-}
+    .users-icon {
+        color: #4f46e5;
+        background: #eef2ff;
+    }
 
-@if (TempData["Error"] != null)
-{
-    <div class="alert alert-danger notification">
-        ! @TempData["Error"]
-    </div>
-}
+    .tasks-icon {
+        color: #2563eb;
+        background: #eff6ff;
+    }
 
-<div class="row mb-4">
+    .completed-icon {
+        color: #059669;
+        background: #ecfdf5;
+    }
 
-    <div class="col-md-3 mb-3">
-        <div class="card shadow-sm p-3 text-center h-100">
+    .pending-icon {
+        color: #d97706;
+        background: #fffbeb;
+    }
 
-            <h6 class="text-muted">
-                Total Users
-            </h6>
+    .stat-label {
+        margin-top: 15px;
+        color: #6b7280;
+        font-size: 14px;
+        font-weight: 500;
+    }
 
-            <h2 class="fw-bold text-primary">
-                @ViewBag.TotalUsers
-            </h2>
+    .stat-value {
+        margin: 7px 0 0;
+        color: #111827;
+        font-size: 32px;
+        font-weight: 800;
+    }
+
+    .users-panel {
+        overflow: hidden;
+        background: #ffffff;
+        border: 1px solid #e5e7eb;
+        border-radius: 16px;
+    }
+
+    .users-panel-header {
+        padding: 24px;
+        border-bottom: 1px solid #e5e7eb;
+    }
+
+        .users-panel-header h3 {
+            color: #111827;
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        .users-panel-header p {
+            color: #6b7280;
+            font-size: 14px;
+            margin: 0;
+        }
+
+    .admin-table {
+        margin: 0;
+    }
+
+        .admin-table thead th {
+            padding: 14px 20px;
+            color: #6b7280;
+            background: #f9fafb;
+            border-bottom: 1px solid #e5e7eb;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: .5px;
+        }
+
+        .admin-table tbody td {
+            padding: 18px 20px;
+            border-color: #f3f4f6;
+            vertical-align: middle;
+        }
+
+        .admin-table tbody tr {
+            transition: .2s;
+        }
+
+            .admin-table tbody tr:hover {
+                background: #fafafa;
+            }
+
+    .user-avatar {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 40px;
+        height: 40px;
+        flex-shrink: 0;
+        color: #4338ca;
+        background: #eef2ff;
+        border-radius: 10px;
+        font-weight: 700;
+    }
+
+    .username {
+        color: #111827;
+        font-weight: 600;
+    }
+
+    .email-text {
+        color: #6b7280;
+        font-size: 14px;
+    }
+
+    .admin-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 5px 9px;
+        color: #7c3aed;
+        background: #f5f3ff;
+        border-radius: 100px;
+        font-size: 11px;
+        font-weight: 700;
+    }
+
+    .user-id {
+        display: inline-block;
+        max-width: 180px;
+        overflow: hidden;
+        color: #9ca3af;
+        font-family: monospace;
+        font-size: 12px;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .action-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 36px;
+        padding: 7px 12px;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 600;
+    }
+
+    .view-btn {
+        color: #374151;
+        background: #ffffff;
+        border: 1px solid #d1d5db;
+    }
+
+        .view-btn:hover {
+            color: #111827;
+            background: #f9fafb;
+            border-color: #9ca3af;
+        }
+
+    .delete-btn {
+        color: #dc2626;
+        background: #ffffff;
+        border: 1px solid #fecaca;
+    }
+
+        .delete-btn:hover {
+            color: #b91c1c;
+            background: #fef2f2;
+            border-color: #fca5a5;
+        }
+
+
+    .empty-users {
+        padding: 70px 20px;
+        text-align: center;
+    }
+
+    @@media(max-width: 767px) {
+        .admin-page {
+            width: calc(100% - 24px);
+            padding-top: 30px;
+        }
+
+        .admin-header h1 {
+            font-size: 30px;
+        }
+
+       
+        .admin-table tbody td {
+            padding: 15px;
+        }
+    }
+</style>
+
+<div class="admin-page">
+
+
+    <!-- HEADER -->
+
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-4 mb-5">
+
+        <div class="admin-header">
+
+            <div class="admin-label">
+                <i class="bi bi-shield-lock"></i>
+                ADMIN CONTROL
+            </div>
+
+            <h1>
+                Admin Dashboard
+            </h1>
+
+            <p>
+                Manage users and monitor the TaskFlow platform.
+            </p>
 
         </div>
+
+        <a asp-controller="Task"
+           asp-action="Index"
+           class="btn btn-outline-dark">
+
+            <i class="bi bi-arrow-left me-2"></i>
+            My Dashboard
+
+        </a>
+
     </div>
 
-    <div class="col-md-3 mb-3">
-        <div class="card shadow-sm p-3 text-center h-100">
 
-            <h6 class="text-muted">
-                Total Tasks
-            </h6>
+    <!-- STATISTICS -->
 
-            <h2 class="fw-bold">
-                @ViewBag.TotalTasks
-            </h2>
+    <div class="row g-4 mb-5">
+
+        <div class="col-6 col-lg-3">
+
+            <div class="admin-stat">
+
+                <div class="stat-icon users-icon">
+                    <i class="bi bi-people"></i>
+                </div>
+
+                <div class="stat-label">
+                    Total Users
+                </div>
+
+                <h2 class="stat-value">
+                    @ViewBag.TotalUsers
+                </h2>
+
+            </div>
 
         </div>
-    </div>
 
-    <div class="col-md-3 mb-3">
-        <div class="card shadow-sm p-3 text-center h-100">
+        <div class="col-6 col-lg-3">
 
-            <h6 class="text-muted">
-                Completed
-            </h6>
+            <div class="admin-stat">
 
-            <h2 class="fw-bold text-success">
-                @ViewBag.CompletedTasks
-            </h2>
+                <div class="stat-icon tasks-icon">
+                    <i class="bi bi-list-check"></i>
+                </div>
 
-        </div>
-    </div>
+                <div class="stat-label">
+                    Total Tasks
+                </div>
 
-    <div class="col-md-3 mb-3">
-        <div class="card shadow-sm p-3 text-center h-100">
+                <h2 class="stat-value">
+                    @ViewBag.TotalTasks
+                </h2>
 
-            <h6 class="text-muted">
-                Pending
-            </h6>
-
-            <h2 class="fw-bold text-warning">
-                @ViewBag.PendingTasks
-            </h2>
+            </div>
 
         </div>
+
+        <div class="col-6 col-lg-3">
+
+            <div class="admin-stat">
+
+                <div class="stat-icon completed-icon">
+                    <i class="bi bi-check2-circle"></i>
+                </div>
+
+                <div class="stat-label">
+                    Completed
+                </div>
+
+                <h2 class="stat-value">
+                    @ViewBag.CompletedTasks
+                </h2>
+
+            </div>
+
+        </div>
+
+        <div class="col-6 col-lg-3">
+
+            <div class="admin-stat">
+
+                <div class="stat-icon pending-icon">
+                    <i class="bi bi-clock"></i>
+                </div>
+
+                <div class="stat-label">
+                    Pending
+                </div>
+
+                <h2 class="stat-value">
+                    @ViewBag.PendingTasks
+                </h2>
+
+            </div>
+
+        </div>
+
     </div>
 
-</div>
 
-<div class="card shadow-sm">
+    <!-- USERS -->
 
-    <div class="card-body">
+    <div class="users-panel">
 
-        <h4 class="fw-bold mb-3">
-            Registered Users
-        </h4>
+        <div class="users-panel-header">
 
-        <div class="table-responsive">
+            <div class="d-flex justify-content-between align-items-center">
 
-            <table class="table table-hover align-middle">
+                <div>
 
-                <thead>
+                    <h3 class="mb-1">
+                        Registered Users
+                    </h3>
 
-                    <tr>
-                        <th>Username</th>
-                        <th>Email</th>
-                        <th>User ID</th>
-                        <th class="text-end">Actions</th>
-                    </tr>
+                    <p>
+                        View accounts, inspect user tasks and manage access.
+                    </p>
 
-                </thead>
+                </div>
 
-                <tbody>
+                <span class="badge text-bg-light">
 
-                    @foreach (var user in Model)
-                    {
-                        var isAdmin =
-                            await UserManager.IsInRoleAsync(
-                                user,
-                                "Admin");
+                    @Model.Count user@(Model.Count == 1 ? "" : "s")
+
+                </span>
+
+            </div>
+
+        </div>
+
+
+        @if (Model.Count == 0)
+        {
+            <div class="empty-users">
+
+                <i class="bi bi-people fs-1 text-muted"></i>
+
+                <h4 class="fw-bold mt-3">
+                    No users found
+                </h4>
+
+                <p class="text-muted">
+                    Registered users will appear here.
+                </p>
+
+            </div>
+        }
+        else
+        {
+            <div class="table-responsive">
+
+                <table class="table admin-table align-middle">
+
+                    <thead>
 
                         <tr>
+                            <th>User</th>
+                            <th>Email</th>
+                            <th>User ID</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
 
-                            <td>
+                    </thead>
 
-                                <div class="d-flex align-items-center gap-2">
+                    <tbody>
 
-                                    <div class="rounded-circle bg-primary text-white d-flex justify-content-center align-items-center"
-                                         style="width:35px;height:35px;">
+                        @foreach (var user in Model)
+                        {
+                            var isAdmin =
+                                await UserManager.IsInRoleAsync(
+                                    user,
+                                    "Admin");
 
-                                        @(string.IsNullOrWhiteSpace(user.UserName)
-                                            ? "?"
-                                            : user.UserName.Substring(0, 1).ToUpper())
+                            <tr>
+
+                                <td>
+
+                                    <div class="d-flex align-items-center gap-3">
+
+                                        <div class="user-avatar">
+
+                                            @(string.IsNullOrWhiteSpace(user.UserName)
+                                                ? "?"
+                                                : user.UserName.Substring(0, 1).ToUpper())
+
+                                        </div>
+
+                                        <div>
+
+                                            <div class="username">
+                                                @user.UserName
+                                            </div>
+
+                                            @if (isAdmin)
+                                            {
+                                                <span class="admin-pill mt-1">
+
+                                                    <i class="bi bi-shield-check"></i>
+
+                                                    ADMIN
+
+                                                </span>
+                                            }
+
+                                        </div>
 
                                     </div>
 
-                                    <strong>
-                                        @user.UserName
-                                    </strong>
+                                </td>
 
-                                    @if (isAdmin)
-                                    {
-                                        <span class="badge bg-danger">
-                                            Admin
-                                        </span>
-                                    }
+                                <td>
 
-                                </div>
+                                    <span class="email-text">
 
-                            </td>
+                                        @(string.IsNullOrWhiteSpace(user.Email)
+                                            ? "Not provided"
+                                            : user.Email)
 
-                            <td>
+                                    </span>
 
-                                @(string.IsNullOrWhiteSpace(user.Email)
-                                    ? "Not provided"
-                                    : user.Email)
+                                </td>
 
-                            </td>
+                                <td>
 
-                            <td>
+                                    <span class="user-id"
+                                          title="@user.Id">
 
-                                <small class="text-muted">
-                                    @user.Id
-                                </small>
+                                        @user.Id
 
-                            </td>
+                                    </span>
 
-                            <td class="text-end">
+                                </td>
 
-                                <div class="d-flex justify-content-end gap-2">
+                                <td class="text-end">
 
-                                    <a asp-controller="Admin"
-                                       asp-action="UserTasks"
-                                       asp-route-id="@user.Id"
-                                       class="btn btn-sm btn-primary">
+                                    <div class="d-flex flex-wrap justify-content-end gap-2">
 
-                                        View Tasks
+                                        <a asp-controller="Admin"
+                                           asp-action="UserTasks"
+                                           asp-route-id="@user.Id"
+                                           class="btn action-btn view-btn">
 
-                                    </a>
+                                            <i class="bi bi-eye me-2"></i>
 
-                                    @if (!isAdmin)
-                                    {
-                                        <form asp-controller="Admin"
-                                              asp-action="DeleteUser"
-                                              method="post"
-                                              onsubmit="return confirm('Are you sure you want to delete @user.UserName? This will also delete all tasks created by this user.');">
+                                            View Tasks
 
-                                            @Html.AntiForgeryToken()
+                                        </a>
 
-                                            <input type="hidden"
-                                                   name="id"
-                                                   value="@user.Id" />
+                                        @if (!isAdmin)
+                                        {
+                                            <form asp-controller="Admin"
+                                                  asp-action="DeleteUser"
+                                                  method="post"
+                                                  onsubmit="return confirmDeleteUser('@user.UserName');">
 
-                                            <button type="submit"
-                                                    class="btn btn-sm btn-danger">
+                                                @Html.AntiForgeryToken()
 
-                                                Delete User
+                                                <input type="hidden"
+                                                       name="id"
+                                                       value="@user.Id" />
 
-                                            </button>
+                                                <button type="submit"
+                                                        class="btn action-btn delete-btn">
 
-                                        </form>
-                                    }
+                                                    <i class="bi bi-trash3 me-2"></i>
 
-                                </div>
+                                                    Delete
 
-                            </td>
+                                                </button>
 
-                        </tr>
-                    }
+                                            </form>
+                                        }
 
-                </tbody>
+                                    </div>
 
-            </table>
+                                </td>
 
-        </div>
+                            </tr>
+                        }
+
+                    </tbody>
+
+                </table>
+
+            </div>
+        }
 
     </div>
 
 </div>
 
-<script>
 
-    setTimeout(() => {
+@section Scripts
+{
+    <script>
 
-        const notifications =
-            document.querySelectorAll(".notification");
+        function returnConfirmMessage(username) {
 
-        notifications.forEach(notification => {
+            return "Delete " + username +
+                "? This will permanently delete the user and all tasks created by them.";
 
-            notification.style.opacity = "0";
+        }
 
-            setTimeout(() => {
+        function confirmDeleteUser(username) {
 
-                notification.remove();
+            return confirm(
+                returnConfirmMessage(username)
+            );
 
-            }, 300);
+        }
 
-        });
 
-    }, 3000);
-
-</script>
+    </script>
+}

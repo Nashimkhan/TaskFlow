@@ -52,6 +52,9 @@ builder.Services.AddScoped<ITaskService, TaskService>();
 
 builder.Services.AddScoped<EmailService>();
 
+builder.Services.AddScoped<GroqAiService>();
+
+
 var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())
