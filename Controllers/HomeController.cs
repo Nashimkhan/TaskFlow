@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using TaskFlow.Services.Implementations;
@@ -377,7 +378,7 @@ namespace TaskFlow.Controllers
             TempData["Success"] =
                 "Check your inbox! We've sent password reset instructions to your email.";
 
-            return RedirectToAction("Igit statndex");
+            return RedirectToAction("Index");
         }
 
         [HttpGet]
@@ -487,6 +488,23 @@ namespace TaskFlow.Controllers
                 "Password reset successfully! You can now login.";
 
             return RedirectToAction("Index");
+        }
+
+        [HttpGet]
+        [AllowAnonymous]
+        public IActionResult CheckAuth()
+        {
+            return Json(new
+            {
+                IsAuthenticated = User.Identity?.IsAuthenticated,
+                Username = User.Identity?.Name,
+                IsAdmin = User.IsInRole("Admin"),
+                Claims = User.Claims.Select(c => new
+                {
+                    c.Type,
+                    c.Value
+                })
+            });
         }
 
         public async Task<IActionResult> Logout()
