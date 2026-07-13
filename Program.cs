@@ -3,12 +3,13 @@ using Microsoft.EntityFrameworkCore;
 using TaskFlow.Data;
 using TaskFlow.Interfaces;
 using TaskFlow.Repositories;
-using TaskFlow.Services.Interfaces;
 using TaskFlow.Services.Implementations;
+using TaskFlow.Services.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllersWithViews();
+builder.Services.AddHttpClient();
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(
@@ -21,6 +22,9 @@ builder.Services.AddIdentity<IdentityUser, IdentityRole>(options =>
     options.Password.RequireUppercase = false;
     options.Password.RequireNonAlphanumeric = false;
     options.Password.RequiredLength = 6;
+
+    options.User.RequireUniqueEmail = true;
+    options.SignIn.RequireConfirmedEmail = true;
 })
 .AddEntityFrameworkStores<AppDbContext>()
 .AddDefaultTokenProviders();
@@ -35,6 +39,7 @@ builder.Services.ConfigureApplicationCookie(options =>
 
 builder.Services.AddScoped<ITaskRepository, TaskRepository>();
 builder.Services.AddScoped<ITaskService, TaskService>();
+builder.Services.AddScoped<EmailService>();
 
 var app = builder.Build();
 
@@ -43,8 +48,12 @@ using (var scope = app.Services.CreateScope())
     var services = scope.ServiceProvider;
 
     var db = services.GetRequiredService<AppDbContext>();
-    var userManager = services.GetRequiredService<UserManager<IdentityUser>>();
-    var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
+
+    var userManager =
+        services.GetRequiredService<UserManager<IdentityUser>>();
+
+    var roleManager =
+        services.GetRequiredService<RoleManager<IdentityRole>>();
 
     db.Database.Migrate();
 
@@ -54,20 +63,23 @@ using (var scope = app.Services.CreateScope())
     {
         if (!await roleManager.RoleExistsAsync(role))
         {
-            await roleManager.CreateAsync(new IdentityRole(role));
+            await roleManager.CreateAsync(
+                new IdentityRole(role));
         }
     }
 
     string adminUsername = "admin";
     string adminPassword = "Admin@123";
 
-    var adminUser = await userManager.FindByNameAsync(adminUsername);
+    var adminUser =
+        await userManager.FindByNameAsync(adminUsername);
 
     if (adminUser == null)
     {
         adminUser = new IdentityUser
         {
-            UserName = adminUsername
+            UserName = adminUsername,
+            EmailConfirmed = true
         };
 
         var result = await userManager.CreateAsync(
@@ -76,12 +88,28 @@ using (var scope = app.Services.CreateScope())
 
         if (result.Succeeded)
         {
-            await userManager.AddToRoleAsync(adminUser, "Admin");
+            await userManager.AddToRoleAsync(
+                adminUser,
+                "Admin");
         }
     }
-    else if (!await userManager.IsInRoleAsync(adminUser, "Admin"))
+    else
     {
-        await userManager.AddToRoleAsync(adminUser, "Admin");
+        if (!adminUser.EmailConfirmed)
+        {
+            adminUser.EmailConfirmed = true;
+
+            await userManager.UpdateAsync(adminUser);
+        }
+
+        if (!await userManager.IsInRoleAsync(
+                adminUser,
+                "Admin"))
+        {
+            await userManager.AddToRoleAsync(
+                adminUser,
+                "Admin");
+        }
     }
 }
 

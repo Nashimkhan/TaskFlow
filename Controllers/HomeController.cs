@@ -1,6 +1,6 @@
-using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using TaskFlow.Services.Implementations;
 
 namespace TaskFlow.Controllers
 {
@@ -8,13 +8,19 @@ namespace TaskFlow.Controllers
     {
         private readonly UserManager<IdentityUser> _userManager;
         private readonly SignInManager<IdentityUser> _signInManager;
+        private readonly EmailService _emailService;
+        private readonly IConfiguration _configuration;
 
         public HomeController(
             UserManager<IdentityUser> userManager,
-            SignInManager<IdentityUser> signInManager)
+            SignInManager<IdentityUser> signInManager,
+            EmailService emailService,
+            IConfiguration configuration)
         {
             _userManager = userManager;
             _signInManager = signInManager;
+            _emailService = emailService;
+            _configuration = configuration;
         }
 
         public IActionResult Index()
@@ -32,74 +38,50 @@ namespace TaskFlow.Controllers
         public async Task<IActionResult> Register(
             string? username,
             string? email,
-            string? password,
-            string? confirmPassword)
+            string? password)
         {
             username = username?.Trim();
             email = email?.Trim();
-
-            ViewBag.ShowRegister = true;
-            ViewBag.RegisterUsername = username;
-            ViewBag.RegisterEmail = email;
+            password = password?.Trim();
 
             if (string.IsNullOrWhiteSpace(username) ||
                 string.IsNullOrWhiteSpace(email) ||
-                string.IsNullOrWhiteSpace(password) ||
-                string.IsNullOrWhiteSpace(confirmPassword))
+                string.IsNullOrWhiteSpace(password))
             {
-                ViewBag.Error = "All fields are required";
-                return View("Index");
+                return RegisterError("All fields are required");
             }
 
-            if (username.Length < 3 || username.Length > 20)
+            if (username.Length < 3)
             {
-                ViewBag.Error =
-                    "Username must be between 3 and 20 characters";
-
-                return View("Index");
+                return RegisterError(
+                    "Username must be at least 3 characters");
             }
 
-            if (!Regex.IsMatch(username, @"^[a-zA-Z0-9]+$"))
+            if (username.Length > 30)
             {
-                ViewBag.Error =
-                    "Username can only contain letters and numbers";
-
-                return View("Index");
+                return RegisterError(
+                    "Username cannot exceed 30 characters");
             }
 
-            if (!Regex.IsMatch(
-                    email,
-                    @"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"))
+            if (!IsValidEmail(email))
             {
-                ViewBag.Error =
-                    "Please enter a valid email address";
-
-                return View("Index");
+                return RegisterError(
+                    "Please enter a valid email address");
             }
 
             if (password.Length < 6)
             {
-                ViewBag.Error =
-                    "Password must be at least 6 characters";
-
-                return View("Index");
+                return RegisterError(
+                    "Password must be at least 6 characters");
             }
 
-            if (password != confirmPassword)
-            {
-                ViewBag.Error = "Passwords do not match";
-
-                return View("Index");
-            }
-
-            var existingUser =
+            var existingUsername =
                 await _userManager.FindByNameAsync(username);
 
-            if (existingUser != null)
+            if (existingUsername != null)
             {
-                ViewBag.Error = "Username already exists";
-
-                return View("Index");
+                return RegisterError(
+                    "Username already exists");
             }
 
             var existingEmail =
@@ -107,33 +89,143 @@ namespace TaskFlow.Controllers
 
             if (existingEmail != null)
             {
-                ViewBag.Error = "Email is already registered";
-
-                return View("Index");
+                return RegisterError(
+                    "Email already registered");
             }
 
             var user = new IdentityUser
             {
                 UserName = username,
-                Email = email
+                Email = email,
+                EmailConfirmed = false
             };
 
-            var result =
-                await _userManager.CreateAsync(user, password);
+            var result = await _userManager.CreateAsync(
+                user,
+                password);
 
             if (!result.Succeeded)
             {
-                ViewBag.Error = string.Join(
+                var errors = string.Join(
                     ", ",
                     result.Errors.Select(e => e.Description));
 
-                return View("Index");
+                return RegisterError(errors);
             }
 
-            await _userManager.AddToRoleAsync(user, "User");
+            var roleResult =
+                await _userManager.AddToRoleAsync(
+                    user,
+                    "User");
+
+            if (!roleResult.Succeeded)
+            {
+                await _userManager.DeleteAsync(user);
+
+                return RegisterError(
+                    "Account could not be created. Please try again.");
+            }
+
+            try
+            {
+                var token =
+                    await _userManager
+                        .GenerateEmailConfirmationTokenAsync(user);
+
+                var baseUrl =
+                    _configuration["App:BaseUrl"];
+
+                if (string.IsNullOrWhiteSpace(baseUrl))
+                {
+                    baseUrl =
+                        $"{Request.Scheme}://{Request.Host}";
+                }
+
+                var relativeLink = Url.Action(
+                    "ConfirmEmail",
+                    "Home",
+                    new
+                    {
+                        userId = user.Id,
+                        token = token
+                    });
+
+                if (string.IsNullOrWhiteSpace(relativeLink))
+                {
+                    throw new InvalidOperationException(
+                        "Verification link could not be created.");
+                }
+
+                var verificationLink =
+                    $"{baseUrl.TrimEnd('/')}{relativeLink}";
+
+                await _emailService
+                    .SendVerificationEmailAsync(
+                        email,
+                        verificationLink);
+            }
+            catch
+            {
+                await _userManager.DeleteAsync(user);
+
+                return RegisterError(
+                    "Verification email could not be sent. Please try again.");
+            }
 
             TempData["Success"] =
-                "Account created successfully! Please login.";
+                "Account created! Check your email and verify your account.";
+
+            return RedirectToAction("Index");
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> ConfirmEmail(
+            string? userId,
+            string? token)
+        {
+            if (string.IsNullOrWhiteSpace(userId) ||
+                string.IsNullOrWhiteSpace(token))
+            {
+                TempData["Error"] =
+                    "Invalid verification link";
+
+                return RedirectToAction("Index");
+            }
+
+            var user =
+                await _userManager.FindByIdAsync(userId);
+
+            if (user == null)
+            {
+                TempData["Error"] =
+                    "User account was not found";
+
+                return RedirectToAction("Index");
+            }
+
+            if (user.EmailConfirmed)
+            {
+                TempData["Success"] =
+                    "Email is already verified. Please login.";
+
+                return RedirectToAction("Index");
+            }
+
+            var result =
+                await _userManager.ConfirmEmailAsync(
+                    user,
+                    token);
+
+            if (!result.Succeeded)
+            {
+                TempData["Error"] =
+                    "Email verification failed or the link is invalid.";
+
+                return RedirectToAction("Index");
+            }
+
+            TempData["Success"] =
+                "Email verified successfully! You can now login.";
 
             return RedirectToAction("Index");
         }
@@ -145,12 +237,32 @@ namespace TaskFlow.Controllers
             string? password)
         {
             username = username?.Trim();
+            password = password?.Trim();
 
             if (string.IsNullOrWhiteSpace(username) ||
                 string.IsNullOrWhiteSpace(password))
             {
                 ViewBag.Error =
                     "Please enter username and password";
+
+                return View("Index");
+            }
+
+            var user =
+                await _userManager.FindByNameAsync(username);
+
+            if (user == null)
+            {
+                ViewBag.Error =
+                    "Invalid username or password";
+
+                return View("Index");
+            }
+
+            if (!user.EmailConfirmed)
+            {
+                ViewBag.Error =
+                    "Please verify your email before logging in";
 
                 return View("Index");
             }
@@ -173,7 +285,9 @@ namespace TaskFlow.Controllers
             TempData["Success"] =
                 "Welcome back, " + username + "!";
 
-            return RedirectToAction("Index", "Task");
+            return RedirectToAction(
+                "Index",
+                "Task");
         }
 
         public async Task<IActionResult> Logout()
@@ -184,6 +298,41 @@ namespace TaskFlow.Controllers
                 "Logged out successfully";
 
             return RedirectToAction("Index");
+        }
+
+        private IActionResult RegisterError(string message)
+        {
+            ViewBag.Error = message;
+            ViewBag.ShowRegister = true;
+
+            return View("Index");
+        }
+
+        private static bool IsValidEmail(string email)
+        {
+            if (string.IsNullOrWhiteSpace(email))
+            {
+                return false;
+            }
+
+            if (email.Count(c => c == '@') != 1)
+            {
+                return false;
+            }
+
+            try
+            {
+                var address =
+                    new System.Net.Mail.MailAddress(email);
+
+                return address.Address.Equals(
+                    email,
+                    StringComparison.OrdinalIgnoreCase);
+            }
+            catch
+            {
+                return false;
+            }
         }
     }
 }

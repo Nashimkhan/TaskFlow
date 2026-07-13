@@ -1,0 +1,187 @@
+﻿@model TaskFlow.Models.TaskItem
+
+@{
+    ViewData["Title"] = "Edit User Task";
+}
+
+<div class="row justify-content-center">
+
+    <div class="col-md-7">
+
+        <div class="card shadow-sm">
+
+            <div class="card-body p-4">
+
+                <h3 class="fw-bold mb-2">
+                    Edit User Task
+                </h3>
+
+                <p class="text-muted mb-4">
+
+                    Admin task management
+
+                </p>
+
+
+                @if (ViewBag.Error != null)
+                {
+                    <div class="alert alert-danger notification">
+
+                        @ViewBag.Error
+
+                    </div>
+                }
+
+
+                <form asp-controller="Admin"
+                      asp-action="EditTask"
+                      method="post">
+
+                    @Html.AntiForgeryToken()
+
+
+                    <input type="hidden"
+                           asp-for="Id" />
+
+
+                    <div class="mb-3">
+
+                        <label class="form-label">
+                            Task Title
+                        </label>
+
+                        <input asp-for="Title"
+                               class="form-control"
+                               required />
+
+                    </div>
+
+
+                    <div class="mb-3">
+
+                        <label class="form-label">
+                            Description
+                        </label>
+
+                        <textarea asp-for="Description"
+                                  class="form-control"
+                                  rows="4">
+                        </textarea>
+
+                    </div>
+
+
+                    <div class="mb-3">
+
+                        <label class="form-label">
+                            Due Date
+                        </label>
+
+                        <input asp-for="DueDate"
+                               type="date"
+                               class="form-control"
+                               required />
+
+                    </div>
+
+
+                    <div class="mb-3">
+
+                        <label class="form-label">
+                            Status
+                        </label>
+
+                        <select asp-for="Status"
+                                class="form-select">
+
+                            <option value="Pending">
+                                Pending
+                            </option>
+
+                            <option value="Done">
+                                Done
+                            </option>
+
+                        </select>
+
+                    </div>
+
+
+                    <div class="mb-4">
+
+                        <label class="form-label">
+                            Priority
+                        </label>
+
+                        <select asp-for="Priority"
+                                class="form-select">
+
+                            <option value="Low">
+                                Low
+                            </option>
+
+                            <option value="Medium">
+                                Medium
+                            </option>
+
+                            <option value="High">
+                                High
+                            </option>
+
+                        </select>
+
+                    </div>
+
+
+                    <div class="d-flex justify-content-between">
+
+                        <a asp-controller="Admin"
+                           asp-action="UserTasks"
+                           asp-route-id="@Model.UserId"
+                           class="btn btn-outline-secondary">
+
+                            Cancel
+
+                        </a>
+
+
+                        <button type="submit"
+                                class="btn btn-primary">
+
+                            Save Changes
+
+                        </button>
+
+                    </div>
+
+                </form>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<script>
+
+    setTimeout(() => {
+
+        const notifications =
+            document.querySelectorAll(".notification");
+
+        notifications.forEach(notification => {
+
+            notification.style.opacity = "0";
+
+            setTimeout(() => {
+                notification.remove();
+            }, 300);
+
+        });
+
+    }, 1500);
+
+</script>
