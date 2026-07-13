@@ -377,7 +377,7 @@ namespace TaskFlow.Controllers
             TempData["Success"] =
                 "Check your inbox! We've sent password reset instructions to your email.";
 
-            return RedirectToAction("Index");
+            return RedirectToAction("Igit statndex");
         }
 
         [HttpGet]
