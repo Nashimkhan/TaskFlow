@@ -1,36 +1,45 @@
-﻿@model List<Microsoft.AspNetCore.Identity.IdentityUser>
+﻿@using Microsoft.AspNetCore.Identity
+@inject UserManager<IdentityUser> UserManager
+
+@model List<Microsoft.AspNetCore.Identity.IdentityUser>
 
 @{
     ViewData["Title"] = "Admin Dashboard";
 }
 
 <div class="d-flex justify-content-between align-items-center mb-4">
+
     <div>
-        <h2 class="fw-bold">👑 Admin Dashboard</h2>
+        <h2 class="fw-bold">
+            👑 Admin Dashboard
+        </h2>
+
         <p class="text-muted">
             Manage users and monitor TaskFlow
         </p>
     </div>
 
-    <div class="d-flex gap-2">
-        <a asp-controller="Task"
-           asp-action="Index"
-           class="btn btn-outline-primary">
-            ← My Dashboard
-        </a>
+    <a asp-controller="Task"
+       asp-action="Index"
+       class="btn btn-outline-primary">
 
-        <a asp-controller="Home"
-           asp-action="Logout"
-           class="btn btn-outline-danger">
-            Logout
-        </a>
-    </div>
+        ← My Dashboard
+
+    </a>
+
 </div>
 
 @if (TempData["Success"] != null)
 {
     <div class="alert alert-success notification">
-        @TempData["Success"]
+        ✓ @TempData["Success"]
+    </div>
+}
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger notification">
+        ! @TempData["Error"]
     </div>
 }
 
@@ -38,41 +47,57 @@
 
     <div class="col-md-3 mb-3">
         <div class="card shadow-sm p-3 text-center h-100">
-            <h6 class="text-muted">Total Users</h6>
+
+            <h6 class="text-muted">
+                Total Users
+            </h6>
 
             <h2 class="fw-bold text-primary">
                 @ViewBag.TotalUsers
             </h2>
+
         </div>
     </div>
 
     <div class="col-md-3 mb-3">
         <div class="card shadow-sm p-3 text-center h-100">
-            <h6 class="text-muted">Total Tasks</h6>
+
+            <h6 class="text-muted">
+                Total Tasks
+            </h6>
 
             <h2 class="fw-bold">
                 @ViewBag.TotalTasks
             </h2>
+
         </div>
     </div>
 
     <div class="col-md-3 mb-3">
         <div class="card shadow-sm p-3 text-center h-100">
-            <h6 class="text-muted">Completed</h6>
+
+            <h6 class="text-muted">
+                Completed
+            </h6>
 
             <h2 class="fw-bold text-success">
                 @ViewBag.CompletedTasks
             </h2>
+
         </div>
     </div>
 
     <div class="col-md-3 mb-3">
         <div class="card shadow-sm p-3 text-center h-100">
-            <h6 class="text-muted">Pending</h6>
+
+            <h6 class="text-muted">
+                Pending
+            </h6>
 
             <h2 class="fw-bold text-warning">
                 @ViewBag.PendingTasks
             </h2>
+
         </div>
     </div>
 
@@ -91,21 +116,29 @@
             <table class="table table-hover align-middle">
 
                 <thead>
+
                     <tr>
                         <th>Username</th>
                         <th>Email</th>
                         <th>User ID</th>
-                        <th class="text-end">Action</th>
+                        <th class="text-end">Actions</th>
                     </tr>
+
                 </thead>
 
                 <tbody>
 
                     @foreach (var user in Model)
                     {
+                        var isAdmin =
+                            await UserManager.IsInRoleAsync(
+                                user,
+                                "Admin");
+
                         <tr>
 
                             <td>
+
                                 <div class="d-flex align-items-center gap-2">
 
                                     <div class="rounded-circle bg-primary text-white d-flex justify-content-center align-items-center"
@@ -121,31 +154,70 @@
                                         @user.UserName
                                     </strong>
 
+                                    @if (isAdmin)
+                                    {
+                                        <span class="badge bg-danger">
+                                            Admin
+                                        </span>
+                                    }
+
                                 </div>
+
                             </td>
 
                             <td>
+
                                 @(string.IsNullOrWhiteSpace(user.Email)
                                     ? "Not provided"
                                     : user.Email)
+
                             </td>
 
                             <td>
+
                                 <small class="text-muted">
                                     @user.Id
                                 </small>
+
                             </td>
 
                             <td class="text-end">
 
-                                <a asp-controller="Admin"
-                                   asp-action="UserTasks"
-                                   asp-route-id="@user.Id"
-                                   class="btn btn-sm btn-primary">
+                                <div class="d-flex justify-content-end gap-2">
 
-                                    View Tasks
+                                    <a asp-controller="Admin"
+                                       asp-action="UserTasks"
+                                       asp-route-id="@user.Id"
+                                       class="btn btn-sm btn-primary">
 
-                                </a>
+                                        View Tasks
+
+                                    </a>
+
+                                    @if (!isAdmin)
+                                    {
+                                        <form asp-controller="Admin"
+                                              asp-action="DeleteUser"
+                                              method="post"
+                                              onsubmit="return confirm('Are you sure you want to delete @user.UserName? This will also delete all tasks created by this user.');">
+
+                                            @Html.AntiForgeryToken()
+
+                                            <input type="hidden"
+                                                   name="id"
+                                                   value="@user.Id" />
+
+                                            <button type="submit"
+                                                    class="btn btn-sm btn-danger">
+
+                                                Delete User
+
+                                            </button>
+
+                                        </form>
+                                    }
+
+                                </div>
 
                             </td>
 
@@ -163,6 +235,7 @@
 </div>
 
 <script>
+
     setTimeout(() => {
 
         const notifications =
@@ -173,10 +246,13 @@
             notification.style.opacity = "0";
 
             setTimeout(() => {
+
                 notification.remove();
+
             }, 300);
 
         });
 
-    }, 2000);
+    }, 3000);
+
 </script>

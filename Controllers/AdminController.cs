@@ -23,11 +23,16 @@ namespace TaskFlow.Controllers
 
         public async Task<IActionResult> Index()
         {
-            var users = await _userManager.Users.ToListAsync();
-            var tasks = await _context.Tasks.ToListAsync();
+            var users = await _userManager.Users
+                .ToListAsync();
+
+            var tasks = await _context.Tasks
+                .ToListAsync();
 
             ViewBag.TotalUsers = users.Count;
+
             ViewBag.TotalTasks = tasks.Count;
+
             ViewBag.CompletedTasks =
                 tasks.Count(t => t.Status == "Done");
 
@@ -39,7 +44,8 @@ namespace TaskFlow.Controllers
 
         public async Task<IActionResult> UserTasks(string id)
         {
-            var user = await _userManager.FindByIdAsync(id);
+            var user =
+                await _userManager.FindByIdAsync(id);
 
             if (user == null)
             {
@@ -85,14 +91,17 @@ namespace TaskFlow.Controllers
             if (string.IsNullOrWhiteSpace(task.Title))
             {
                 ViewBag.Error = "Task title is required";
+
                 return View(task);
             }
 
             existingTask.Title = task.Title.Trim();
+
             existingTask.Description =
                 task.Description?.Trim() ?? string.Empty;
 
             existingTask.Status = task.Status;
+
             existingTask.Priority = task.Priority;
 
             existingTask.DueDate = DateTime.SpecifyKind(
@@ -106,7 +115,10 @@ namespace TaskFlow.Controllers
 
             return RedirectToAction(
                 "UserTasks",
-                new { id = existingTask.UserId });
+                new
+                {
+                    id = existingTask.UserId
+                });
         }
 
         [HttpPost]
@@ -132,7 +144,70 @@ namespace TaskFlow.Controllers
 
             return RedirectToAction(
                 "UserTasks",
-                new { id = userId });
+                new
+                {
+                    id = userId
+                });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteUser(string id)
+        {
+            var user =
+                await _userManager.FindByIdAsync(id);
+
+            if (user == null)
+            {
+                TempData["Error"] =
+                    "User not found";
+
+                return RedirectToAction("Index");
+            }
+
+            var isAdmin =
+                await _userManager.IsInRoleAsync(
+                    user,
+                    "Admin");
+
+            if (isAdmin)
+            {
+                TempData["Error"] =
+                    "Admin account cannot be deleted";
+
+                return RedirectToAction("Index");
+            }
+
+            var userTasks = await _context.Tasks
+                .Where(t => t.UserId == user.Id)
+                .ToListAsync();
+
+            if (userTasks.Any())
+            {
+                _context.Tasks.RemoveRange(userTasks);
+
+                await _context.SaveChangesAsync();
+            }
+
+            var username = user.UserName;
+
+            var result =
+                await _userManager.DeleteAsync(user);
+
+            if (!result.Succeeded)
+            {
+                TempData["Error"] = string.Join(
+                    ", ",
+                    result.Errors.Select(
+                        e => e.Description));
+
+                return RedirectToAction("Index");
+            }
+
+            TempData["Success"] =
+                $"User {username} deleted successfully";
+
+            return RedirectToAction("Index");
         }
     }
 }
