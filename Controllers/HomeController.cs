@@ -244,6 +244,38 @@ namespace TaskFlow.Controllers
         }
 
         [HttpGet]
+        public async Task<IActionResult> CheckEmailVerification(
+    string? email)
+        {
+            if (string.IsNullOrWhiteSpace(email))
+            {
+                return Json(new
+                {
+                    verified = false
+                });
+            }
+
+            email = email.Trim().ToLowerInvariant();
+
+            var user =
+                await _userManager.FindByEmailAsync(email);
+
+            if (user != null &&
+                user.EmailConfirmed)
+            {
+                return Json(new
+                {
+                    verified = true
+                });
+            }
+
+            return Json(new
+            {
+                verified = false
+            });
+        }
+
+        [HttpGet]
         public async Task<IActionResult> ConfirmEmail(
             int id,
             string? token)
@@ -358,8 +390,9 @@ namespace TaskFlow.Controllers
             TempData["Success"] =
                 "Email verified successfully! Your TaskFlow account is now active. You can login.";
 
-            return RedirectToAction("Index");
-        }
+            return RedirectToAction(
+              "EmailVerified");
+             }
 
         [HttpPost]
         [ValidateAntiForgeryToken]

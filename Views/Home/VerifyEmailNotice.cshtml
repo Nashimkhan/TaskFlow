@@ -90,13 +90,17 @@
                 Verify your email before logging in.
             </div>
 
-            <div class="spinner-border spinner-border-sm text-primary"
-                 role="status">
-            </div>
+            <div id="waitingSection">
 
-            <p class="text-muted waiting-text mt-2 mb-0">
-                Waiting for email verification...
-            </p>
+                <div class="spinner-border spinner-border-sm text-primary"
+                     role="status">
+                </div>
+
+                <p class="text-muted waiting-text mt-2 mb-0">
+                    Waiting for email verification...
+                </p>
+
+            </div>
 
             <p class="text-muted small mt-3 mb-0">
                 Can't find the email? Check your spam or junk folder.
@@ -105,6 +109,63 @@
         </div>
 
     </div>
+
+    <script>
+
+            const email = @Html.Raw(
+                            System.Text.Json.JsonSerializer.Serialize(email)
+                    );
+
+            const checkVerification = async () => {
+
+                try {
+
+                    const response = await fetch(
+                        `/Home/CheckEmailVerification?email=${encodeURIComponent(email)}`,
+                        {
+                            cache: "no-store"
+                        }
+                    );
+
+                    if (!response.ok) {
+                        return;
+                    }
+
+                    const data = await response.json();
+
+                    if (data.verified === true) {
+
+                        document.getElementById("waitingSection").innerHTML = `
+                            <div class="alert alert-success mb-0">
+                                ✓ Email verified! Redirecting to login...
+                            </div>
+                        `;
+
+                        setTimeout(() => {
+
+                            window.location.href = "/";
+
+                        }, 3000);
+                    }
+
+                }
+                catch (error) {
+
+                    console.log(
+                        "Waiting for verification..."
+                    );
+
+                }
+            };
+
+            checkVerification();
+
+            setInterval(
+                checkVerification,
+                2000
+            );
+
+    </script>
 
 </body>
 </html>
