@@ -21,6 +21,93 @@ namespace TaskFlow.Services.Implementations
             string email,
             string verificationLink)
         {
+            var html = $"""
+                <h2>Welcome to TaskFlow 🚀</h2>
+
+                <p>Please verify your email address.</p>
+
+                <p>
+                    <a href="{verificationLink}"
+                       style="
+                       display:inline-block;
+                       background:#0d6efd;
+                       color:white;
+                       padding:12px 20px;
+                       text-decoration:none;
+                       border-radius:6px;">
+
+                        Verify Email
+
+                    </a>
+                </p>
+
+                <p>
+                    If you did not create this account,
+                    you can ignore this email.
+                </p>
+
+                <p>TaskFlow</p>
+                """;
+
+            await SendEmailAsync(
+                email,
+                "Verify your TaskFlow email",
+                html);
+        }
+
+        public async Task SendPasswordResetEmailAsync(
+            string email,
+            string username,
+            string resetLink)
+        {
+            var html = $"""
+                <h2>Reset your TaskFlow password</h2>
+
+                <p>Hello,</p>
+
+                <p>
+                    We received a request to reset your password.
+                </p>
+
+                <p>
+                    Your TaskFlow username is:
+                    <strong>{username}</strong>
+                </p>
+
+                <p>
+                    <a href="{resetLink}"
+                       style="
+                       display:inline-block;
+                       background:#0d6efd;
+                       color:white;
+                       padding:12px 20px;
+                       text-decoration:none;
+                       border-radius:6px;">
+
+                        Reset Password
+
+                    </a>
+                </p>
+
+                <p>
+                    If you did not request a password reset,
+                    you can ignore this email.
+                </p>
+
+                <p>TaskFlow</p>
+                """;
+
+            await SendEmailAsync(
+                email,
+                "Reset your TaskFlow password",
+                html);
+        }
+
+        private async Task SendEmailAsync(
+            string email,
+            string subject,
+            string htmlContent)
+        {
             var apiKey =
                 _configuration["Brevo:ApiKey"];
 
@@ -54,54 +141,12 @@ namespace TaskFlow.Services.Implementations
                 {
                     new
                     {
-                        email = email
+                        email
                     }
                 },
 
-                subject = "Verify your TaskFlow email",
-
-                htmlContent = $"""
-                <!DOCTYPE html>
-                <html>
-                <body style="font-family:Arial,sans-serif;">
-
-                    <h2>Welcome to TaskFlow 🚀</h2>
-
-                    <p>
-                        Thank you for creating your TaskFlow account.
-                    </p>
-
-                    <p>
-                        Please verify your email address before logging in.
-                    </p>
-
-                    <p>
-                        <a href="{verificationLink}"
-                           style="
-                           display:inline-block;
-                           background:#0d6efd;
-                           color:white;
-                           padding:12px 20px;
-                           text-decoration:none;
-                           border-radius:6px;">
-
-                            Verify Email
-
-                        </a>
-                    </p>
-
-                    <p>
-                        If you did not create this account,
-                        you can ignore this email.
-                    </p>
-
-                    <p>
-                        TaskFlow
-                    </p>
-
-                </body>
-                </html>
-                """
+                subject,
+                htmlContent
             };
 
             var json =

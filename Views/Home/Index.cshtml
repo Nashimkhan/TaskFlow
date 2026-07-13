@@ -31,7 +31,15 @@
                 border-radius: 10px;
             }
 
+            .email-info {
+                font-size: 13px;
+            }
+
             .notification {
+                border: none;
+                border-radius: 10px;
+                font-size: 14px;
+                padding: 12px 15px;
                 transition: opacity 0.3s ease;
             }
 
@@ -56,8 +64,27 @@
 
             @if (TempData["Success"] != null)
             {
-                <div class="alert alert-success notification">
-                    @TempData["Success"]
+                <div class="alert alert-success notification d-flex align-items-center gap-2">
+
+                    <span class="fw-bold">✓</span>
+
+                    <span>
+                        @TempData["Success"]
+                    </span>
+
+                </div>
+            }
+
+            @if (TempData["Error"] != null)
+            {
+                <div class="alert alert-danger notification d-flex align-items-center gap-2">
+
+                    <span class="fw-bold">!</span>
+
+                    <span>
+                        @TempData["Error"]
+                    </span>
+
                 </div>
             }
 
@@ -87,6 +114,7 @@
 
             <form id="loginForm"
                   method="post"
+                  asp-controller="Home"
                   asp-action="Login"
                   style="display:@(showRegister ? "none" : "block");">
 
@@ -99,9 +127,21 @@
 
                 <input name="password"
                        type="password"
-                       class="form-control mb-3"
+                       class="form-control mb-2"
                        placeholder="Password"
                        required />
+
+                <div class="text-end mb-3">
+
+                    <a asp-controller="Home"
+                       asp-action="ForgotPassword"
+                       class="text-decoration-none small">
+
+                        Forgot Password?
+
+                    </a>
+
+                </div>
 
                 <button type="submit"
                         class="btn btn-primary w-100">
@@ -112,11 +152,11 @@
 
             </form>
 
-
             <!-- REGISTER -->
 
             <form id="registerForm"
                   method="post"
+                  asp-controller="Home"
                   asp-action="Register"
                   style="display:@(showRegister ? "block" : "none");">
 
@@ -134,10 +174,14 @@
 
                 <input name="email"
                        type="email"
-                       class="form-control mb-3"
+                       class="form-control mb-1"
                        placeholder="Enter Email"
                        value="@ViewBag.RegisterEmail"
                        required />
+
+                <small class="text-muted email-info d-block mb-3">
+                    Please use a valid email. A verification link will be sent to this address.
+                </small>
 
                 <input name="password"
                        type="password"
@@ -162,12 +206,15 @@
 
             </form>
 
-
             @if (ViewBag.Error != null)
             {
-                <div class="alert alert-danger notification mt-3 mb-0">
+                <div class="alert alert-danger notification mt-3 mb-0 d-flex align-items-center gap-2">
 
-                    @ViewBag.Error
+                    <span class="fw-bold">!</span>
+
+                    <span>
+                        @ViewBag.Error
+                    </span>
 
                 </div>
             }
@@ -175,7 +222,6 @@
         </div>
 
     </div>
-
 
     <script>
 
@@ -192,7 +238,6 @@
                     "btn btn-light w-50 toggle-btn";
             }
 
-
             function showRegister() {
 
                 document.getElementById("loginForm").style.display = "none";
@@ -206,7 +251,6 @@
                     "btn btn-light w-50 toggle-btn";
             }
 
-
             setTimeout(() => {
 
                 const notifications =
@@ -217,12 +261,14 @@
                     notification.style.opacity = "0";
 
                     setTimeout(() => {
+
                         notification.remove();
+
                     }, 300);
 
                 });
 
-            }, 1500);
+            }, 3000);
 
     </script>
 
