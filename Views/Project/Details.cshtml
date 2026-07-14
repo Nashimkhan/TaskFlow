@@ -1,823 +1,108 @@
-﻿@using Microsoft.AspNetCore.Identity
 @model TaskFlow.Models.Project
 
 @{
     ViewData["Title"] = Model.Name;
-
-    var users = ViewBag.Users as Dictionary<string, string>
-        ?? new Dictionary<string, string>();
-
-    var isOwner = ViewBag.IsOwner == true;
-
     var totalTasks = Model.Tasks.Count;
-
-    var completedTasks =
-        Model.Tasks.Count(t => t.Status == "Done");
-
-    var progress =
-        totalTasks == 0
-            ? 0
-            : (int)Math.Round(
-                completedTasks * 100.0 / totalTasks);
-
-    var acceptedMembers =
-        Model.Members
-            .Where(x => x.Status == "Accepted")
-            .ToList();
-
-    var pendingMembers =
-        Model.Members
-            .Where(x => x.Status == "Pending")
-            .ToList();
-
-    var currentUserId =
-        User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+    var completedTasks = Model.Tasks.Count(t => t.Status == "Done");
+    var pendingTasks = totalTasks - completedTasks;
+    var progress = totalTasks == 0 ? 0 : (int)Math.Round(completedTasks * 100.0 / totalTasks);
 }
 
-<div class="page">
+<style>
+    .project-details-page { padding: 42px 0 70px; }
+    .project-hero { padding: 28px; background: #fff; border: 1px solid #e5e7eb; border-radius: 16px; }
+    .project-name { color: #111827; font-size: clamp(30px, 4vw, 44px); font-weight: 800; letter-spacing: -1.5px; }
+    .project-description { max-width: 720px; color: #6b7280; line-height: 1.7; }
+    .stat-card { height: 100%; padding: 20px; background: #fff; border: 1px solid #e5e7eb; border-radius: 14px; }
+    .stat-value { color: #111827; font-size: 28px; font-weight: 800; }
+    .task-card { padding: 20px; background: #fff; border: 1px solid #e5e7eb; border-radius: 14px; }
+    .task-title { color: #111827; font-size: 17px; font-weight: 700; }
+    .task-description { color: #6b7280; font-size: 14px; line-height: 1.6; }
+    .empty-project-tasks { padding: 55px 24px; text-align: center; background: #fff; border: 1px dashed #d1d5db; border-radius: 14px; }
+    @@media (max-width: 576px) { .project-details-page { padding-top: 24px; } .project-hero { padding: 22px; } .task-actions { width: 100%; } .task-actions .btn, .task-actions form { flex: 1; } .task-actions form .btn { width: 100%; } }
+</style>
 
-    <div class="container">
+<div class="project-details-page">
+    <a asp-action="Index" class="text-decoration-none text-muted small">
+        <i class="bi bi-arrow-left me-2"></i>Back to projects
+    </a>
 
-        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 page-header">
-
+    <section class="project-hero mt-4">
+        <div class="d-flex flex-wrap justify-content-between align-items-start gap-4">
             <div>
-
-                <a asp-action="Index"
-                   class="btn btn-light mb-3">
-
-                    <i class="bi bi-arrow-left me-2"></i>
-
-                    Back
-
-                </a>
-
-                <h1 class="page-title">
-
-                    @Model.Name
-
-                </h1>
-
-                <p class="page-subtitle">
-
-                    @(string.IsNullOrWhiteSpace(Model.Description)
-                        ? "No description available."
-                        : Model.Description)
-
-                </p>
-
+                <h1 class="project-name mb-2">@Model.Name</h1>
+                <p class="project-description mb-0">@(string.IsNullOrWhiteSpace(Model.Description) ? "No project description." : Model.Description)</p>
             </div>
 
-            <div class="text-end">
-
-                <h2 class="fw-bold">
-
-                    @progress%
-
-                </h2>
-
-                <small class="text-muted">
-
-                    Completed
-
-                </small>
-
-            </div>
-
+            <a asp-controller="Task" asp-action="Create" asp-route-projectId="@Model.Id" class="btn btn-primary">
+                <i class="bi bi-plus-lg me-2"></i>Add Task
+            </a>
         </div>
 
-        <div class="card mb-4">
+        <div class="mt-4">
+            <div class="d-flex justify-content-between small text-muted mb-2">
+                <span>Project progress</span><span>@progress%</span>
+            </div>
+            <div class="progress"><div class="progress-bar" style="width:@progress%"></div></div>
+        </div>
+    </section>
 
-            <div class="card-body">
+    <div class="row g-3 my-3">
+        <div class="col-6 col-lg-3"><div class="stat-card"><div class="text-muted small">Total tasks</div><div class="stat-value">@totalTasks</div></div></div>
+        <div class="col-6 col-lg-3"><div class="stat-card"><div class="text-muted small">Completed</div><div class="stat-value">@completedTasks</div></div></div>
+        <div class="col-6 col-lg-3"><div class="stat-card"><div class="text-muted small">Pending</div><div class="stat-value">@pendingTasks</div></div></div>
+        <div class="col-6 col-lg-3"><div class="stat-card"><div class="text-muted small">Deadline</div><div class="fw-bold mt-2">@Model.Deadline.ToString("dd MMM yyyy")</div></div></div>
+    </div>
 
-                <div class="row align-items-center">
+    <div class="d-flex justify-content-between align-items-center mt-5 mb-3">
+        <h2 class="h4 fw-bold mb-0">Project tasks</h2>
+    </div>
 
-                    <div class="col-lg-9">
-
-                        <div class="progress mb-3">
-
-                            <div class="progress-bar"
-                                 style="width:@progress%">
+    @if (!Model.Tasks.Any())
+    {
+        <div class="empty-project-tasks">
+            <i class="bi bi-check2-square fs-2 text-primary"></i>
+            <h3 class="h5 fw-bold mt-3">No tasks yet</h3>
+            <p class="text-muted">Add the first task to start tracking this project.</p>
+            <a asp-controller="Task" asp-action="Create" asp-route-projectId="@Model.Id" class="btn btn-primary">Add Task</a>
+        </div>
+    }
+    else
+    {
+        <div class="d-grid gap-3">
+            @foreach (var task in Model.Tasks.OrderBy(t => t.Status == "Done").ThenBy(t => t.DueDate))
+            {
+                <article class="task-card">
+                    <div class="d-flex flex-wrap justify-content-between align-items-start gap-3">
+                        <div class="flex-grow-1">
+                            <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
+                                <span class="task-title">@task.Title</span>
+                                <span class="badge @(task.Status == "Done" ? "bg-success-subtle text-success" : "bg-warning-subtle text-warning-emphasis")">@task.Status</span>
+                                <span class="badge bg-light text-dark">@task.Priority</span>
                             </div>
-
+                            <p class="task-description mb-2">@(string.IsNullOrWhiteSpace(task.Description) ? "No description." : task.Description)</p>
+                            <small class="text-muted"><i class="bi bi-calendar3 me-1"></i>Due @task.DueDate.ToString("dd MMM yyyy")</small>
                         </div>
 
-                        <div class="d-flex gap-4 flex-wrap text-muted">
-
-                            <span>
-
-                                <i class="bi bi-check2-square me-2"></i>
-
-                                @completedTasks / @totalTasks Tasks
-
-                            </span>
-
-                            <span>
-
-                                <i class="bi bi-calendar3 me-2"></i>
-
-                                @Model.Deadline.ToString("dd MMM yyyy")
-
-                            </span>
-
-                            <span>
-
-                                <i class="bi bi-people me-2"></i>
-
-                                @(acceptedMembers.Count + 1) Members
-
-                            </span>
-
-                        </div>
-
-                    </div>
-
-                    <div class="col-lg-3 text-lg-end mt-3 mt-lg-0">
-
-                        @if (isOwner)
-                        {
-                            <a asp-controller="Task"
-                               asp-action="Create"
-                               asp-route-projectId="@Model.Id"
-                               class="btn btn-primary">
-
-                                <i class="bi bi-plus-lg me-2"></i>
-
-                                New Task
-
-                            </a>
-                        }
-
-                    </div>
-
-                </div>
-
-            </div>
-
-        </div>
-
-        <div class="row">
-
-            <div class="col-lg-8">
-
-                               <div class="card">
-
-    <div class="card-body">
-
-        <div class="d-flex justify-content-between align-items-center mb-4">
-
-            <div>
-
-                <h3 class="section-title">
-
-                    Project Tasks
-
-                </h3>
-
-                <small class="text-muted">
-
-                    @completedTasks of @totalTasks completed
-
-                </small>
-
-            </div>
-
-            @if (isOwner)
-            {
-                <a asp-action="AiBreakdown"
-                   asp-controller="Task"
-                   asp-route-projectId="@Model.Id"
-                   class="btn btn-outline-primary">
-
-                    <i class="bi bi-stars me-2"></i>
-
-                    AI Breakdown
-
-                </a>
-            }
-
-        </div>
-
-        @if (!Model.Tasks.Any())
-        {
-
-            <div class="empty-state">
-
-                <i class="bi bi-list-task"></i>
-
-                <h3>
-
-                    No Tasks Yet
-
-                </h3>
-
-                <p>
-
-                    Create your first project task.
-
-                </p>
-
-            </div>
-
-        }
-        else
-        {
-
-            @foreach (var task in Model.Tasks.OrderBy(x => x.DueDate))
-            {
-
-                var assignedUser =
-                    string.IsNullOrWhiteSpace(task.AssignedUserId)
-                    ? null
-                    : users.TryGetValue(task.AssignedUserId, out var username)
-                        ? username
-                        : "Unknown User";
-
-                var statusClass =
-                    task.Status == "Done"
-                        ? "status-done"
-                        : "status-pending";
-
-                var priorityClass =
-                    task.Priority == "High"
-                        ? "priority-high"
-                        : task.Priority == "Medium"
-                            ? "priority-medium"
-                            : "priority-low";
-
-                <div class="task-card">
-
-                    <div class="d-flex justify-content-between align-items-start mb-3">
-
-                        <div>
-
-                            <h5 class="task-title">
-
-                                @task.Title
-
-                            </h5>
-
-                            <p class="task-description mb-0">
-
-                                @(string.IsNullOrWhiteSpace(task.Description)
-                                    ? "No description available."
-                                    : task.Description)
-
-                            </p>
-
-                        </div>
-
-                        <span class="badge @statusClass">
-
-                            @task.Status
-
-                        </span>
-
-                    </div>
-
-                    <div class="row g-3">
-
-                        <div class="col-md-4">
-
-                            <small class="text-muted">
-
-                                Priority
-
-                            </small>
-
-                            <br />
-
-                            <span class="badge @priorityClass">
-
-                                @task.Priority
-
-                            </span>
-
-                        </div>
-
-                        <div class="col-md-4">
-
-                            <small class="text-muted">
-
-                                Due Date
-
-                            </small>
-
-                            <br />
-
-                            <strong>
-
-                                @task.DueDate.ToString("dd MMM yyyy")
-
-                            </strong>
-
-                        </div>
-
-                        <div class="col-md-4">
-
-                            <small class="text-muted">
-
-                                Assigned To
-
-                            </small>
-
-                            <br />
-
-                            @if (assignedUser == null)
+                        <div class="d-flex flex-wrap gap-2 task-actions">
+                            @if (task.Status != "Done")
                             {
-                                <span class="badge bg-danger">
-
-                                    Unassigned
-
-                                </span>
+                                <form asp-action="CompleteTask" method="post">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="id" value="@task.Id" />
+                                    <button class="btn btn-outline-success btn-sm">Complete</button>
+                                </form>
                             }
-                            else
-                            {
-                                <span class="badge bg-success">
-
-                                    @assignedUser
-
-                                </span>
-                            }
-
+                            <a asp-action="EditTask" asp-route-id="@task.Id" class="btn btn-outline-secondary btn-sm">Edit</a>
+                            <form asp-action="DeleteTask" method="post" onsubmit="return confirm('Delete this task?');">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="id" value="@task.Id" />
+                                <button class="btn btn-outline-danger btn-sm">Delete</button>
+                            </form>
                         </div>
-
                     </div>
-                                    <div class="d-flex justify-content-between align-items-center mt-4">
-
-                                        <div>
-
-                                            @if (task.Status == "Done")
-                                            {
-                                                <span class="badge bg-success">
-
-                                                    <i class="bi bi-check-circle me-1"></i>
-
-                                                    Completed
-
-                                                </span>
-                                            }
-                                            else if (string.IsNullOrWhiteSpace(task.AssignedUserId))
-                                            {
-                                                <span class="badge bg-secondary">
-
-                                                    <i class="bi bi-hourglass-split me-1"></i>
-
-                                                    Waiting for Assignment
-
-                                                </span>
-                                            }
-                                            else if (task.AssignedUserId == currentUserId)
-                                            {
-                                                <form asp-action="CompleteTask"
-                                                      method="post"
-                                                      class="d-inline">
-
-                                                    @Html.AntiForgeryToken()
-
-                                                    <input type="hidden"
-                                                           name="id"
-                                                           value="@task.Id" />
-
-                                                    <button class="btn btn-success btn-sm">
-
-                                                        <i class="bi bi-check2 me-1"></i>
-
-                                                        Mark Complete
-
-                                                    </button>
-
-                                                </form>
-                                            }
-                                            else
-                                            {
-                                                <span class="badge bg-info">
-
-                                                    <i class="bi bi-person-check me-1"></i>
-
-                                                    Assigned to another member
-
-                                                </span>
-                                            }
-
-                                        </div>
-
-                                        @if (isOwner)
-                                        {
-
-                                            <div class="d-flex gap-2">
-
-                                                <a asp-action="EditTask"
-                                                   asp-route-id="@task.Id"
-                                                   class="btn btn-outline-primary btn-sm">
-
-                                                    <i class="bi bi-pencil me-1"></i>
-
-                                                    Edit
-
-                                                </a>
-
-                                                <form asp-action="DeleteTask"
-                                                      method="post"
-                                                      onsubmit="return confirm('Delete this task?');">
-
-                                                    @Html.AntiForgeryToken()
-
-                                                    <input type="hidden"
-                                                           name="id"
-                                                           value="@task.Id" />
-
-                                                    <button class="btn btn-outline-danger btn-sm">
-
-                                                        <i class="bi bi-trash me-1"></i>
-
-                                                        Delete
-
-                                                    </button>
-
-                                                </form>
-
-                                            </div>
-
-                                        }
-
-                                    </div>
-
-                                </div>
-
-                            }
-
-                        }
-
-                    </div>
-
-                </div>
-
-            </div>
-
-            <div class="col-lg-4">
-                @if (isOwner)
-{
-
-    <div class="card mb-4">
-
-        <div class="card-body">
-
-            <div class="d-flex justify-content-between align-items-center mb-4">
-
-                <h3 class="section-title mb-0">
-
-                    Team
-
-                </h3>
-
-                <span class="badge bg-primary">
-
-                    @(acceptedMembers.Count + 1)
-
-                </span>
-
-            </div>
-
-            @{
-                var ownerName =
-                    users.TryGetValue(Model.OwnerId, out var owner)
-                        ? owner
-                        : "Owner";
+                </article>
             }
-
-            <div class="member">
-
-                <div class="member-info">
-
-                    <div class="member-avatar">
-
-                        @ownerName.Substring(0,1).ToUpper()
-
-                    </div>
-
-                    <div>
-
-                        <div class="member-name">
-
-                            @ownerName
-
-                        </div>
-
-                        <small class="text-muted">
-
-                            Owner
-
-                        </small>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-            @foreach (var member in acceptedMembers)
-            {
-
-                var memberName =
-                    users.TryGetValue(member.UserId, out var name)
-                        ? name
-                        : "Unknown User";
-
-                <div class="member">
-
-                    <div class="member-info">
-
-                        <div class="member-avatar">
-
-                            @memberName.Substring(0,1).ToUpper()
-
-                        </div>
-
-                        <div>
-
-                            <div class="member-name">
-
-                                @memberName
-
-                            </div>
-
-                            <small class="text-muted">
-
-                                Team Member
-
-                            </small>
-
-                        </div>
-
-                    </div>
-
-                    <form asp-action="RemoveMember"
-                          method="post"
-                          onsubmit="return confirm('Remove this member?');">
-
-                        @Html.AntiForgeryToken()
-
-                        <input type="hidden"
-                               name="projectId"
-                               value="@Model.Id"/>
-
-                        <input type="hidden"
-                               name="memberId"
-                               value="@member.Id"/>
-
-                        <button class="btn btn-outline-danger btn-sm">
-
-                            Remove
-
-                        </button>
-
-                    </form>
-
-                </div>
-
-            }
-
         </div>
-
-    </div>
-
-    <div class="card mb-4">
-
-        <div class="card-body">
-
-            <h3 class="section-title mb-4">
-
-                Pending Invitations
-
-            </h3>
-
-            @if (!pendingMembers.Any())
-            {
-
-                <div class="text-muted">
-
-                    No pending invitations.
-
-                </div>
-
-            }
-            else
-            {
-
-                @foreach (var member in pendingMembers)
-                {
-
-                    var memberName =
-                        users.TryGetValue(member.UserId, out var name)
-                            ? name
-                            : "Unknown User";
-
-                    <div class="member">
-
-                        <div class="member-info">
-
-                            <div class="member-avatar">
-
-                                @memberName.Substring(0,1).ToUpper()
-
-                            </div>
-
-                            <div>
-
-                                <div class="member-name">
-
-                                    @memberName
-
-                                </div>
-
-                                <small class="text-warning">
-
-                                    Pending
-
-                                </small>
-
-                            </div>
-
-                        </div>
-
-                        <form asp-action="CancelInvitation"
-                              method="post">
-
-                            @Html.AntiForgeryToken()
-
-                            <input type="hidden"
-                                   name="projectId"
-                                   value="@Model.Id"/>
-
-                            <input type="hidden"
-                                   name="memberId"
-                                   value="@member.Id"/>
-
-                            <button class="btn btn-outline-warning btn-sm">
-
-                                Cancel
-
-                            </button>
-
-                        </form>
-
-                    </div>
-
-                }
-
-            }
-
-        </div>
-
-    </div>
-
-    <div class="card">
-
-        <div class="card-body">
-
-            <h3 class="section-title mb-3">
-
-                Invite Member
-
-            </h3>
-
-            <form asp-action="Invite"
-                  method="post">
-
-                @Html.AntiForgeryToken()
-
-                <input type="hidden"
-                       name="projectId"
-                       value="@Model.Id"/>
-
-                <input class="form-control mb-3"
-                       name="userSearch"
-                       placeholder="Username or Email"
-                       required/>
-
-                <button class="btn btn-primary w-100">
-
-                    <i class="bi bi-person-plus me-2"></i>
-
-                    Send Invitation
-
-                </button>
-
-            </form>
-
-        </div>
-
-    </div>
-
-}
-else
-{
-
-    <div class="card">
-
-        <div class="card-body">
-
-            <h3 class="section-title mb-4">
-
-                Team Members
-
-            </h3>
-
-            @{
-                var ownerName =
-                    users.TryGetValue(Model.OwnerId, out var owner)
-                        ? owner
-                        : "Owner";
-            }
-
-            <div class="member">
-
-                <div class="member-info">
-
-                    <div class="member-avatar">
-
-                        @ownerName.Substring(0,1).ToUpper()
-
-                    </div>
-
-                    <div>
-
-                        <div class="member-name">
-
-                            @ownerName
-
-                        </div>
-
-                        <small class="text-muted">
-
-                            Project Owner
-
-                        </small>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-                            @foreach (var member in acceptedMembers)
-                            {
-                                var memberName =
-                                    users.TryGetValue(member.UserId, out var name)
-                                        ? name
-                                        : "Unknown User";
-
-                                <div class="member">
-
-                                    <div class="member-info">
-
-                                        <div class="member-avatar">
-
-                                            @memberName.Substring(0,1).ToUpper()
-
-                                        </div>
-
-                                        <div>
-
-                                            <div class="member-name">
-
-                                                @memberName
-
-                                            </div>
-
-                                            @if (member.UserId == currentUserId)
-                                            {
-                                                <small class="text-primary">
-
-                                                    You
-
-                                                </small>
-                                            }
-                                            else
-                                            {
-                                                <small class="text-muted">
-
-                                                    Team Member
-
-                                                </small>
-                                            }
-
-                                        </div>
-
-                                    </div>
-
-                                </div>
-
-                            }
-
-                        </div>
-
-                    </div>
-
-                }
-
-            </div>
-
-        </div>
-
-    </div>
+    }
+</div>

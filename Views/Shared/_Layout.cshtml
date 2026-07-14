@@ -1,4 +1,4 @@
-﻿@using Microsoft.AspNetCore.Identity
+@using Microsoft.AspNetCore.Identity
 
 <!DOCTYPE html>
 
@@ -39,9 +39,9 @@
 
 <header class="app-header">
 
-<nav class="navbar navbar-expand-lg py-3">
+<nav class="navbar navbar-expand-lg">
 
-    <div class="container-fluid navbar-container">
+<div class="container">
 
 <a asp-controller="Home"
    asp-action="Index"
@@ -104,23 +104,6 @@ AI Planner
 </a>
 
 </li>
-
-@if(!User.IsInRole("Admin"))
-{
-
-<li class="nav-item">
-
-<a asp-controller="Project"
-   asp-action="Invitations"
-   class="nav-link">
-
-Invitations
-
-</a>
-
-</li>
-
-}
 
 @if(User.IsInRole("Admin"))
 {
@@ -260,45 +243,45 @@ Get Started
 
 </header>
 
-<main class="app-main">
+<main class="page-content">
 
-    @if (TempData["Success"] != null)
-    {
-        <div class="container pt-3">
+<div class="container">
 
-            <div class="alert alert-success alert-dismissible fade show">
+@if(TempData["Success"]!=null)
+{
 
-                @TempData["Success"]
+<div class="alert alert-success alert-dismissible fade show shadow-sm">
 
-                <button type="button"
-                        class="btn-close"
-                        data-bs-dismiss="alert">
-                </button>
+<i class="bi bi-check-circle-fill me-2"></i>
 
-            </div>
+@TempData["Success"]
 
-        </div>
-    }
+<button class="btn-close"
+        data-bs-dismiss="alert"></button>
 
-    @if (TempData["Error"] != null)
-    {
-        <div class="container pt-3">
+</div>
 
-            <div class="alert alert-danger alert-dismissible fade show">
+}
 
-                @TempData["Error"]
+@if(TempData["Error"]!=null)
+{
 
-                <button type="button"
-                        class="btn-close"
-                        data-bs-dismiss="alert">
-                </button>
+<div class="alert alert-danger alert-dismissible fade show shadow-sm">
 
-            </div>
+<i class="bi bi-exclamation-circle-fill me-2"></i>
 
-        </div>
-    }
+@TempData["Error"]
 
-    @RenderBody()
+<button class="btn-close"
+        data-bs-dismiss="alert"></button>
+
+</div>
+
+}
+
+@RenderBody()
+
+</div>
 
 </main>
 

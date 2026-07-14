@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using TaskFlow.Models;
@@ -95,27 +95,19 @@ namespace TaskFlow.Controllers
         [HttpGet]
         public async Task<IActionResult> Create(int? projectId)
         {
-            ViewBag.ProjectId = projectId;
-
             if (projectId.HasValue)
             {
-                var project = await _context.Projects
-                    .Include(p => p.Members)
-                    .FirstOrDefaultAsync(p => p.Id == projectId.Value);
+                var userId = GetUserId();
+                var ownsProject = await _context.Projects
+                    .AnyAsync(p => p.Id == projectId.Value && p.OwnerId == userId);
 
-                if (project == null)
-                {
-                    return NotFound();
-                }
-
-                if (project.OwnerId != GetUserId())
+                if (!ownsProject)
                 {
                     return Forbid();
                 }
-
-                ViewBag.ProjectMembers =
-                    await GetAssignableProjectUsers(project);
             }
+
+            ViewBag.ProjectId = projectId;
 
             return View(new TaskItem
             {
@@ -125,17 +117,11 @@ namespace TaskFlow.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(TaskItem task)
+        public IActionResult Create(TaskItem task)
         {
-            if (!await PrepareProjectTaskForCreate(task))
-            {
-                return Forbid();
-            }
-
             if (!ModelState.IsValid)
             {
-                await PopulateCreateViewData(task.ProjectId);
-
+                ViewBag.ProjectId = task.ProjectId;
                 return View(task);
             }
 
@@ -215,13 +201,8 @@ namespace TaskFlow.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> AiBreakdown(int? projectId)
+        public IActionResult AiBreakdown()
         {
-            if (!await PopulateProjectContext(projectId))
-            {
-                return Forbid();
-            }
-
             return View();
         }
 
@@ -231,15 +212,8 @@ namespace TaskFlow.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> AiBreakdown(
-            string goal,
-            int? projectId)
+        public async Task<IActionResult> AiBreakdown(string goal)
         {
-            if (!await PopulateProjectContext(projectId))
-            {
-                return Forbid();
-            }
-
             if (string.IsNullOrWhiteSpace(goal))
             {
                 ViewBag.Error = "Please enter your goal.";
@@ -269,24 +243,16 @@ namespace TaskFlow.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> AddAiTasks(
-            List<AiSuggestedTask> tasks,
-            List<int>? selectedTasks,
-            int? projectId)
+        public IActionResult AddAiTasks(
+    List<AiSuggestedTask> tasks,
+    List<int>? selectedTasks)
         {
-            if (!await PopulateProjectContext(projectId))
-            {
-                return Forbid();
-            }
-
             if (selectedTasks == null || selectedTasks.Count == 0)
             {
                 TempData["Error"] =
                     "Please select at least one task.";
 
-                return RedirectToAction(
-                    "AiBreakdown",
-                    new { projectId });
+                return RedirectToAction("AiBreakdown");
             }
 
             foreach (var index in selectedTasks)
@@ -303,8 +269,7 @@ namespace TaskFlow.Controllers
                         Description = aiTask.Description,
                         Priority = aiTask.Priority,
                         Status = "Pending",
-                        DueDate = aiTask.SuggestedDueDate,
-                        ProjectId = projectId
+                        DueDate = aiTask.SuggestedDueDate
                     },
                     GetUserId());
             }
@@ -312,126 +277,9 @@ namespace TaskFlow.Controllers
             TempData["Success"] =
                 "AI tasks added successfully!";
 
-            if (projectId.HasValue)
-            {
-                return RedirectToAction(
-                    "Details",
-                    "Project",
-                    new { id = projectId.Value });
-            }
-
             return RedirectToAction("Index");
         }
 
-        private async Task<bool> PrepareProjectTaskForCreate(TaskItem task)
-        {
-            if (!task.ProjectId.HasValue)
-            {
-                task.AssignedUserId = null;
-
-                return true;
-            }
-
-            var project = await _context.Projects
-                .Include(p => p.Members)
-                .FirstOrDefaultAsync(p => p.Id == task.ProjectId.Value);
-
-            if (project == null)
-            {
-                ModelState.AddModelError(
-                    nameof(task.ProjectId),
-                    "Project was not found.");
-
-                return true;
-            }
-
-            if (project.OwnerId != GetUserId())
-            {
-                return false;
-            }
-
-            var assignableUserIds = GetAssignableUserIds(project);
-
-            if (!string.IsNullOrWhiteSpace(task.AssignedUserId) &&
-                !assignableUserIds.Contains(task.AssignedUserId))
-            {
-                ModelState.AddModelError(
-                    nameof(task.AssignedUserId),
-                    "Choose the project owner or an accepted project member.");
-            }
-
-            ViewBag.ProjectMembers =
-                await GetUsersByIds(assignableUserIds);
-
-            return true;
-        }
-
-        private async Task PopulateCreateViewData(int? projectId)
-        {
-            ViewBag.ProjectId = projectId;
-
-            if (!projectId.HasValue)
-            {
-                return;
-            }
-
-            var project = await _context.Projects
-                .Include(p => p.Members)
-                .FirstOrDefaultAsync(p => p.Id == projectId.Value);
-
-            if (project != null)
-            {
-                ViewBag.ProjectMembers =
-                    await GetAssignableProjectUsers(project);
-            }
-        }
-
-        private async Task<List<IdentityUser>> GetAssignableProjectUsers(
-            Project project)
-        {
-            return await GetUsersByIds(GetAssignableUserIds(project));
-        }
-
-        private static List<string> GetAssignableUserIds(Project project)
-        {
-            return project.Members
-                .Where(m => m.Status == "Accepted")
-                .Select(m => m.UserId)
-                .Append(project.OwnerId)
-                .Distinct()
-                .ToList();
-        }
-
-        private async Task<List<IdentityUser>> GetUsersByIds(
-            List<string> userIds)
-        {
-            return await _userManager.Users
-                .Where(u => userIds.Contains(u.Id))
-                .OrderBy(u => u.UserName)
-                .ToListAsync();
-        }
-
-        private async Task<bool> PopulateProjectContext(int? projectId)
-        {
-            ViewBag.ProjectId = projectId;
-
-            if (!projectId.HasValue)
-            {
-                return true;
-            }
-
-            var project = await _context.Projects
-                .FirstOrDefaultAsync(p => p.Id == projectId.Value);
-
-            if (project == null)
-            {
-                return false;
-            }
-
-            ViewBag.ProjectName = project.Name;
-
-            return project.OwnerId == GetUserId();
-        }
 
     }
 

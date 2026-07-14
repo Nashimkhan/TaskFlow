@@ -1,4 +1,3 @@
-﻿@using Microsoft.AspNetCore.Identity
 @model TaskFlow.Models.TaskItem
 
 @{
@@ -8,248 +7,416 @@
 <link href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css"
       rel="stylesheet" />
 
-<div class="page">
+<style>
+
+    .create-task-page {
+        width: 100%;
+        max-width: 760px;
+        margin: 0 auto;
+        padding: 45px 0 70px;
+    }
+
+    .task-back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 28px;
+        color: #6b7280;
+        font-size: 14px;
+        font-weight: 600;
+        text-decoration: none;
+    }
+
+        .task-back-link:hover {
+            color: #4f46e5;
+        }
+
+    .task-page-header {
+        margin-bottom: 32px;
+    }
+
+    .task-page-title {
+        margin: 0 0 10px;
+        color: #111827;
+        font-size: 38px;
+        font-weight: 800;
+        letter-spacing: -1.5px;
+    }
+
+    .task-page-subtitle {
+        margin: 0;
+        color: #6b7280;
+        font-size: 15px;
+        line-height: 1.6;
+    }
+
+    .task-form-card {
+        padding: 32px;
+        background: #ffffff;
+        border: 1px solid #e5e7eb;
+        border-radius: 16px;
+        box-shadow: 0 15px 45px rgba(17, 24, 39, .05);
+    }
+
+    .task-label {
+        margin-bottom: 8px;
+        color: #374151;
+        font-size: 14px;
+        font-weight: 600;
+    }
+
+    .task-input {
+        min-height: 48px;
+        color: #111827;
+        background: #ffffff;
+        border: 1px solid #d1d5db;
+        border-radius: 10px;
+    }
+
+        .task-input:focus {
+            border-color: #6366f1;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, .1);
+        }
+
+    textarea.task-input {
+        min-height: 125px;
+        resize: vertical;
+    }
+
+    .field-help {
+        margin-top: 7px;
+        color: #9ca3af;
+        font-size: 12px;
+    }
+
+    .form-divider {
+        margin: 28px 0;
+        border-color: #f3f4f6;
+        opacity: 1;
+    }
+
+    .task-actions {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 12px;
+    }
 
-    <div class="container" style="max-width:760px;">
+    .cancel-btn,
+    .create-btn {
+        min-height: 46px;
+        padding: 10px 20px;
+        border-radius: 9px;
+        font-size: 14px;
+        font-weight: 600;
+    }
 
-        <div class="page-header">
+    .create-btn {
+        color: #ffffff;
+        background: #4f46e5;
+        border: 0;
+    }
 
-            <a asp-action="Index"
-               class="btn btn-light mb-3">
+        .create-btn:hover {
+            color: #ffffff;
+            background: #4338ca;
+        }
 
-                <i class="bi bi-arrow-left me-2"></i>
+    @@media (max-width: 767px) {
 
-                Back
+        .create-task-page {
+            padding: 30px 0 50px;
+        }
 
-            </a>
+        .task-page-title {
+            font-size: 31px;
+        }
 
-            <h1 class="page-title">
+        .task-form-card {
+            padding: 22px;
+        }
 
-                Create Task
+        .task-actions {
+            flex-direction: column-reverse;
+        }
 
-            </h1>
+            .task-actions .btn {
+                width: 100%;
+            }
+    }
+</style>
 
-            <p class="page-subtitle">
 
-                Add a task and organize your work.
+<div class="create-task-page">
 
-            </p>
+    <a asp-controller="Task"
+       asp-action="Index"
+       class="task-back-link">
 
-        </div>
+        <i class="bi bi-arrow-left"></i>
 
-        <div class="card">
+        Back to tasks
 
-            <div class="card-body">
+    </a>
 
-                <form asp-action="Create"
-                      method="post">
 
-                    @Html.AntiForgeryToken()
+    <div class="task-page-header">
 
-                    <input asp-for="ProjectId"
-                           type="hidden" />
+        <h1 class="task-page-title">
+            Create a task
+        </h1>
 
-                    <div asp-validation-summary="ModelOnly"
-                         class="text-danger mb-3"></div>
+        <p class="task-page-subtitle">
 
-                    <div class="mb-4">
+            Add a clear task, choose its priority and set a due date.
 
-                        <label asp-for="Title"
-                               class="form-label">
+        </p>
 
-                            Title
+    </div>
 
-                        </label>
 
-                        <input asp-for="Title"
-                               class="form-control"
-                               placeholder="Task title" />
+    <div class="task-form-card">
 
-                        <span asp-validation-for="Title"
-                              class="text-danger"></span>
+        <form asp-controller="Task"
+              asp-action="Create"
+              method="post">
 
-                    </div>
+            @Html.AntiForgeryToken()
 
-                    <div class="mb-4">
 
-                        <label asp-for="Description"
-                               class="form-label">
+            <input asp-for="ProjectId"
+                   type="hidden" />
 
-                            Description
 
-                        </label>
+            <div asp-validation-summary="ModelOnly"
+                 class="text-danger mb-4">
+            </div>
 
-                        <textarea asp-for="Description"
-                                  class="form-control"
-                                  placeholder="Task description"></textarea>
 
-                        <span asp-validation-for="Description"
-                              class="text-danger"></span>
+            <!-- TITLE -->
 
-                    </div>
+            <div class="mb-4">
 
-                    <div class="row">
+                <label asp-for="Title"
+                       class="form-label task-label">
 
-                        <div class="col-md-6 mb-4">
+                    Task title
 
-                            <label asp-for="Status"
-                                   class="form-label">
+                </label>
 
-                                Status
 
-                            </label>
+                <input asp-for="Title"
+                       class="form-control task-input"
+                       placeholder="Example: Review ASP.NET Core MVC" />
 
-                            <select asp-for="Status"
-                                    class="form-select">
 
-                                <option value="Pending">
+                <span asp-validation-for="Title"
+                      class="text-danger small">
+                </span>
 
-                                    Pending
 
-                                </option>
+                <div class="field-help">
 
-                                <option value="Done">
+                    Keep the task title short and actionable.
 
-                                    Done
-
-                                </option>
-
-                            </select>
-
-                        </div>
-
-                        <div class="col-md-6 mb-4">
-
-                            <label asp-for="Priority"
-                                   class="form-label">
-
-                                Priority
-
-                            </label>
-
-                            <select asp-for="Priority"
-                                    class="form-select">
-
-                                <option value="Low">
-
-                                    Low
-
-                                </option>
-
-                                <option value="Medium">
-
-                                    Medium
-
-                                </option>
-
-                                <option value="High">
-
-                                    High
-
-                                </option>
-
-                            </select>
-
-                        </div>
-
-                    </div>
-
-                    <div class="mb-4">
-
-                        <label asp-for="DueDate"
-                               class="form-label">
-
-                            Due Date
-
-                        </label>
-
-                        <input asp-for="DueDate"
-                               id="datePicker"
-                               class="form-control" />
-
-                    </div>
-
-                    @if (ViewBag.ProjectMembers != null)
-                    {
-
-                        <div class="mb-4">
-
-                            <label class="form-label">
-
-                                Assign To
-
-                            </label>
-
-                            <select asp-for="AssignedUserId"
-                                    class="form-select">
-
-                                <option value="">
-
-                                    Unassigned
-
-                                </option>
-
-                                @foreach (var user in (List<IdentityUser>)ViewBag.ProjectMembers)
-                                {
-
-                                    <option value="@user.Id">
-
-                                        @user.UserName
-
-                                    </option>
-
-                                }
-
-                            </select>
-
-                        </div>
-
-                    }
-
-                    <div class="d-flex justify-content-end gap-2">
-
-                        <a asp-action="Index"
-                           class="btn btn-light">
-
-                            Cancel
-
-                        </a>
-
-                        <button class="btn btn-primary">
-
-                            <i class="bi bi-plus-lg me-2"></i>
-
-                            Create Task
-
-                        </button>
-
-                    </div>
-
-                </form>
+                </div>
 
             </div>
 
-        </div>
+
+            <!-- DESCRIPTION -->
+
+            <div class="mb-4">
+
+                <label asp-for="Description"
+                       class="form-label task-label">
+
+                    Description
+
+                </label>
+
+
+                <textarea asp-for="Description"
+                          class="form-control task-input"
+                          placeholder="Add notes or context for this task..."></textarea>
+
+
+                <span asp-validation-for="Description"
+                      class="text-danger small">
+                </span>
+
+            </div>
+
+
+            <hr class="form-divider" />
+
+
+            <!-- STATUS + PRIORITY -->
+
+            <div class="row g-4">
+
+                <div class="col-md-6">
+
+                    <label asp-for="Status"
+                           class="form-label task-label">
+
+                        Status
+
+                    </label>
+
+
+                    <select asp-for="Status"
+                            class="form-select task-input">
+
+                        <option value="Pending">
+                            Pending
+                        </option>
+
+                        <option value="Done">
+                            Done
+                        </option>
+
+                    </select>
+
+
+                    <span asp-validation-for="Status"
+                          class="text-danger small">
+                    </span>
+
+                </div>
+
+
+                <div class="col-md-6">
+
+                    <label asp-for="Priority"
+                           class="form-label task-label">
+
+                        Priority
+
+                    </label>
+
+
+                    <select asp-for="Priority"
+                            class="form-select task-input">
+
+                        <option value="Low">
+                            Low
+                        </option>
+
+                        <option value="Medium">
+                            Medium
+                        </option>
+
+                        <option value="High">
+                            High
+                        </option>
+
+                    </select>
+
+
+                    <span asp-validation-for="Priority"
+                          class="text-danger small">
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <!-- DUE DATE -->
+
+            <div class="mt-4">
+
+                <label asp-for="DueDate"
+                       class="form-label task-label">
+
+                    Due date
+
+                </label>
+
+
+                <div class="input-group">
+
+                    <span class="input-group-text bg-white border-end-0">
+
+                        <i class="bi bi-calendar3 text-muted"></i>
+
+                    </span>
+
+
+                    <input asp-for="DueDate"
+                           id="datePicker"
+                           class="form-control task-input border-start-0"
+                           autocomplete="off" />
+
+                </div>
+
+
+                <span asp-validation-for="DueDate"
+                      class="text-danger small">
+                </span>
+
+
+                <div class="field-help">
+
+                    Choose when you plan to complete this task.
+
+                </div>
+
+            </div>
+
+
+            <hr class="form-divider" />
+
+
+            <!-- ACTIONS -->
+
+            <div class="task-actions">
+
+                <a asp-controller="Task"
+                   asp-action="Index"
+                   class="btn btn-outline-secondary cancel-btn">
+
+                    Cancel
+
+                </a>
+
+
+                <button type="submit"
+                        class="btn create-btn">
+
+                    <i class="bi bi-plus-lg me-2"></i>
+
+                    Create task
+
+                </button>
+
+            </div>
+
+        </form>
 
     </div>
 
 </div>
 
+
 @section Scripts {
 
     <partial name="_ValidationScriptsPartial" />
 
+
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
 
     <script>
 
-        flatpickr("#datePicker",{
+        flatpickr("#datePicker", {
 
-        dateFormat:"Y-m-d",
+        dateFormat: "Y-m-d",
 
-        minDate:"today",
+        minDate: "today",
 
-        disableMobile:true
+        disableMobile: true
 
         });
 

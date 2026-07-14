@@ -14,7 +14,7 @@
     --border: #E5E7EB;
     --text: #111827;
     --muted: #6B7280;
-    --radius: 8px;
+    --radius: 12px;
     --shadow: 0 1px 2px rgba(0,0,0,.04), 0 8px 20px rgba(0,0,0,.04);
     --transition: .2s ease;
 }
@@ -40,7 +40,6 @@ body {
     font-family: Inter, Segoe UI, sans-serif;
     font-size: 15px;
     line-height: 1.6;
-    overflow-x: hidden;
 }
 
 a {
@@ -60,39 +59,20 @@ img {
     max-width: 1180px;
 }
 
-.page-content {
-    min-height: calc(100vh - 64px);
-}
-
-.flash-container {
-    padding-top: 24px;
-}
-
-.flash-container:empty {
-    display: none;
-}
-
 /* ===========================================
    NAVBAR
 =========================================== */
 
 .navbar {
-    min-height: 64px;
+    height: 64px;
     background: #fff;
     border-bottom: 1px solid var(--border);
 }
 
-.navbar .container {
-    gap: 14px;
-}
-
 .navbar-brand {
-    display: inline-flex;
-    align-items: center;
     font-size: 22px;
     font-weight: 700;
     color: var(--text) !important;
-    white-space: nowrap;
 }
 
 .nav-link {
@@ -130,32 +110,18 @@ img {
     padding: 45px 0 60px;
 }
 
-.page > .container {
-    width: min(100% - 32px, 1180px);
-    padding-right: 0;
-    padding-left: 0;
-}
-
 .page-header {
     margin-bottom: 35px;
-}
-
-.page-header > div:first-child {
-    min-width: 0;
 }
 
 .page-title {
     font-size: 32px;
     font-weight: 700;
     margin-bottom: 8px;
-    overflow-wrap: anywhere;
 }
 
 .page-subtitle {
     color: var(--muted);
-    max-width: 760px;
-    margin-bottom: 0;
-    overflow-wrap: anywhere;
 }
 
 /* ===========================================
@@ -167,10 +133,6 @@ img {
     border-radius: var(--radius);
     box-shadow: var(--shadow);
     background: #fff;
-}
-
-.card:has(.table) {
-    overflow-x: auto;
 }
 
 .card-header {
@@ -188,18 +150,9 @@ img {
 =========================================== */
 
 .btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 42px;
-    border-radius: 8px;
+    border-radius: 10px;
     font-weight: 600;
-    white-space: nowrap;
     transition: var(--transition);
-}
-
-.btn-sm {
-    min-height: 34px;
 }
 
 .btn-primary {
@@ -242,7 +195,7 @@ img {
 
 .form-control,
 .form-select {
-    border-radius: 8px;
+    border-radius: 10px;
     border: 1px solid var(--border);
     min-height: 48px;
     box-shadow: none !important;
@@ -273,7 +226,6 @@ textarea.form-control {
 
 .table {
     margin-bottom: 0;
-    min-width: 720px;
 }
 
     .table thead {
@@ -310,7 +262,7 @@ textarea.form-control {
 
 .alert {
     border: none;
-    border-radius: 8px;
+    border-radius: 12px;
     padding: 16px 18px;
 }
 
@@ -368,11 +320,10 @@ textarea.form-control {
 .task-card {
     background: #fff;
     border: 1px solid var(--border);
-    border-radius: 8px;
+    border-radius: 12px;
     padding: 20px;
     margin-bottom: 18px;
     transition: .2s;
-    overflow: hidden;
 }
 
     .task-card:hover {
@@ -384,14 +335,12 @@ textarea.form-control {
     font-size: 18px;
     font-weight: 700;
     margin-bottom: 8px;
-    overflow-wrap: anywhere;
 }
 
 .task-description {
     color: var(--muted);
     font-size: 14px;
     margin-bottom: 18px;
-    overflow-wrap: anywhere;
 }
 
 .task-meta {
@@ -409,11 +358,9 @@ textarea.form-control {
 .project-card {
     background: #fff;
     border: 1px solid var(--border);
-    border-radius: 8px;
+    border-radius: 12px;
     padding: 24px;
     transition: .2s;
-    height: 100%;
-    overflow: hidden;
 }
 
     .project-card:hover {
@@ -424,13 +371,11 @@ textarea.form-control {
 .project-title {
     font-size: 20px;
     font-weight: 700;
-    overflow-wrap: anywhere;
 }
 
 .project-description {
     color: var(--muted);
     margin: 12px 0 18px;
-    overflow-wrap: anywhere;
 }
 
 /* ===========================================
@@ -456,7 +401,7 @@ textarea.form-control {
     text-align: center;
     padding: 70px 30px;
     border: 2px dashed var(--border);
-    border-radius: 8px;
+    border-radius: 16px;
     background: #fff;
 }
 
@@ -483,9 +428,8 @@ textarea.form-control {
 .stat-card {
     background: #fff;
     border: 1px solid var(--border);
-    border-radius: 8px;
+    border-radius: 14px;
     padding: 22px;
-    height: 100%;
 }
 
 .stat-title {
@@ -544,7 +488,6 @@ textarea.form-control {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 14px;
     padding: 14px 0;
     border-bottom: 1px solid #F3F4F6;
 }
@@ -557,11 +500,9 @@ textarea.form-control {
     display: flex;
     align-items: center;
     gap: 12px;
-    min-width: 0;
 }
 
 .member-avatar {
-    flex: 0 0 auto;
     width: 42px;
     height: 42px;
     border-radius: 50%;
@@ -575,7 +516,6 @@ textarea.form-control {
 
 .member-name {
     font-weight: 600;
-    overflow-wrap: anywhere;
 }
 
 /* ===========================================
@@ -585,7 +525,7 @@ textarea.form-control {
 .ai-box {
     background: #fff;
     border: 1px solid var(--border);
-    border-radius: 8px;
+    border-radius: 16px;
     padding: 28px;
 }
 
@@ -666,20 +606,6 @@ textarea.form-control {
         padding: 12px 0;
     }
 
-    .navbar-collapse {
-        padding-top: 12px;
-    }
-
-    .navbar-nav {
-        align-items: stretch !important;
-        gap: 6px;
-    }
-
-    .navbar .dropdown-menu {
-        box-shadow: none;
-        border: 1px solid var(--border);
-    }
-
     .page {
         padding: 24px 0;
     }
@@ -692,21 +618,9 @@ textarea.form-control {
         flex-direction: column;
         gap: 6px;
     }
-
-    .page-header {
-        margin-bottom: 24px;
-    }
-
-    .page-header .btn {
-        flex: 0 0 auto;
-    }
 }
 
 @media(max-width:768px) {
-
-    .page > .container {
-        width: min(100% - 24px, 1180px);
-    }
 
     .card-body {
         padding: 18px;
@@ -727,115 +641,17 @@ textarea.form-control {
     .table {
         font-size: 14px;
     }
-
-    .page-header {
-        align-items: flex-start !important;
-    }
-
-    .page-header > .d-flex,
-    .page-header > a.btn {
-        width: 100%;
-    }
-
-    .page-header > .d-flex {
-        flex-wrap: wrap;
-    }
-
-    .page-header > .d-flex .btn {
-        flex: 1 1 160px;
-    }
-
-    .task-card > .d-flex,
-    .project-card > .d-flex,
-    .member {
-        align-items: flex-start !important;
-    }
-
-    .task-card .badge,
-    .project-card .badge {
-        white-space: normal;
-        text-align: center;
-    }
 }
 
 @media(max-width:576px) {
 
-    .flash-container {
-        width: min(100% - 24px, 1180px);
-        padding-top: 16px;
+    .btn {
+        width: 100%;
     }
 
     .page-title {
         font-size: 22px;
     }
-
-    .page-subtitle {
-        font-size: 14px;
-    }
-
-    .card-body,
-    .project-card,
-    .task-card,
-    .stat-card {
-        padding: 16px;
-    }
-
-    .empty-state {
-        padding: 44px 18px;
-    }
-
-    .empty-state .d-flex,
-    form .d-flex.justify-content-end {
-        align-items: stretch;
-        flex-direction: column;
-    }
-
-    .empty-state .btn,
-    form .d-flex.justify-content-end .btn {
-        width: 100%;
-    }
-
-    .task-card > .d-flex.justify-content-between,
-    .project-card > .d-flex.justify-content-between {
-        gap: 12px;
-        flex-direction: column;
-    }
-
-    .member {
-        flex-direction: column;
-    }
-
-    .member form,
-    .member .btn {
-        width: 100%;
-    }
-}
-
-html,
-body {
-    width: 100%;
-    min-height: 100%;
-    margin: 0;
-}
-
-body {
-    min-height: 100vh;
-    overflow-x: hidden;
-}
-
-.app-main {
-    width: 100%;
-    min-height: 0;
-    margin: 0;
-    padding: 0;
-}
-
-.navbar-container {
-    width: 100%;
-    max-width: 1400px;
-    margin: 0 auto;
-    padding-left: 32px;
-    padding-right: 32px;
 }
 
 /* ===========================================

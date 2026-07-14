@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 
 namespace TaskFlow.Models
 {
@@ -18,13 +18,8 @@ namespace TaskFlow.Models
 
         public string OwnerId { get; set; } = string.Empty;
 
-        public DateTime CreatedAt { get; set; }
-            = DateTime.UtcNow;
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
-        public List<ProjectMember> Members { get; set; }
-            = new();
-
-        public List<TaskItem> Tasks { get; set; }
-            = new();
+        public List<TaskItem> Tasks { get; set; } = new();
     }
 }
