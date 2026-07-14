@@ -1,518 +1,310 @@
 ﻿@model List<TaskFlow.Models.TaskItem>
 
 @{
-    ViewData["Title"] = "Dashboard";
+    ViewData["Title"] = "Overview";
 }
 
-<style>
-    .dashboard-page {
-        max-width: 1320px;
-        width: calc(100% - 40px);
-        margin: 0 auto;
-        padding: 45px 0 70px;
-    }
+<div class="page">
 
-    .dashboard-heading h1 {
-        color: #111827;
-        font-size: 38px;
-        font-weight: 800;
-        letter-spacing: -1.5px;
-    }
+    <div class="container">
 
-    .dashboard-heading p {
-        color: #6b7280;
-        margin: 0;
-    }
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 page-header">
 
-    .dashboard-btn {
-        border-radius: 9px;
-        padding: 11px 18px;
-        font-weight: 600;
-    }
+            <div>
 
-    .stat-card {
-        height: 100%;
-        padding: 24px;
-        background: #ffffff;
-        border: 1px solid #e5e7eb;
-        border-radius: 14px;
-        transition: .25s;
-    }
+                <h1 class="page-title">
 
-        .stat-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 15px 35px rgba(0, 0, 0, .05);
-        }
+                    Overview
 
-    .stat-icon {
-        width: 42px;
-        height: 42px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 10px;
-        font-size: 19px;
-    }
+                </h1>
 
-    .icon-total {
-        color: #4f46e5;
-        background: #eef2ff;
-    }
+                <p class="page-subtitle">
 
-    .icon-completed {
-        color: #059669;
-        background: #ecfdf5;
-    }
+                    Stay organized and keep track of everything in one place.
 
-    .icon-pending {
-        color: #d97706;
-        background: #fffbeb;
-    }
+                </p>
 
-    .icon-overdue {
-        color: #dc2626;
-        background: #fef2f2;
-    }
+            </div>
 
-    .stat-label {
-        color: #6b7280;
-        font-size: 14px;
-        font-weight: 500;
-    }
+            <div class="d-flex gap-2">
 
-    .stat-number {
-        margin-top: 10px;
-        margin-bottom: 0;
-        color: #111827;
-        font-size: 32px;
-        font-weight: 800;
-    }
+                @if (User.IsInRole("Admin"))
+                {
+                    <a asp-controller="Admin"
+                       asp-action="Index"
+                       class="btn btn-outline-primary">
 
-    .filter-panel {
-        padding: 18px;
-        background: #ffffff;
-        border: 1px solid #e5e7eb;
-        border-radius: 14px;
-    }
+                        <i class="bi bi-shield-lock me-2"></i>
 
-        .filter-panel .form-control,
-        .filter-panel .form-select {
-            min-height: 44px;
-            border-color: #e5e7eb;
-            border-radius: 9px;
-        }
+                        Admin
 
-            .filter-panel .form-control:focus,
-            .filter-panel .form-select:focus {
-                border-color: #6366f1;
-                box-shadow: 0 0 0 4px rgba(99, 102, 241, .1);
-            }
+                    </a>
+                }
 
-    .task-card {
-        position: relative;
-        height: 100%;
-        padding: 24px;
-        background: #ffffff;
-        border: 1px solid #e5e7eb;
-        border-radius: 14px;
-        transition: .25s;
-    }
+                <a asp-controller="Task"
+                   asp-action="AiBreakdown"
+                   class="btn btn-outline-primary">
 
-        .task-card:hover {
-            transform: translateY(-4px);
-            border-color: #c7d2fe;
-            box-shadow: 0 18px 45px rgba(0, 0, 0, .06);
-        }
+                    <i class="bi bi-stars me-2"></i>
 
-    .task-title {
-        padding-right: 10px;
-        color: #111827;
-        font-size: 18px;
-        font-weight: 700;
-    }
-
-    .task-description {
-        min-height: 48px;
-        margin-top: 14px;
-        color: #6b7280;
-        font-size: 14px;
-        line-height: 1.7;
-    }
-
-    .status-badge,
-    .priority-badge,
-    .overdue-badge {
-        display: inline-flex;
-        align-items: center;
-        padding: 6px 10px;
-        border-radius: 100px;
-        font-size: 12px;
-        font-weight: 600;
-    }
-
-    .status-done {
-        color: #047857;
-        background: #ecfdf5;
-    }
-
-    .status-pending {
-        color: #b45309;
-        background: #fffbeb;
-    }
-
-    .priority-high {
-        color: #b91c1c;
-        background: #fef2f2;
-    }
-
-    .priority-medium {
-        color: #4338ca;
-        background: #eef2ff;
-    }
-
-    .priority-low {
-        color: #4b5563;
-        background: #f3f4f6;
-    }
-
-    .overdue-badge {
-        color: #b91c1c;
-        background: #fef2f2;
-    }
-
-    .task-meta {
-        padding-top: 18px;
-        margin-top: 18px;
-        border-top: 1px solid #f3f4f6;
-    }
-
-    .due-date {
-        color: #6b7280;
-        font-size: 13px;
-    }
-
-        .due-date.overdue {
-            color: #dc2626;
-            font-weight: 600;
-        }
-
-    .task-action {
-        width: 36px;
-        height: 36px;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        padding: 0;
-        border: 1px solid #e5e7eb;
-        border-radius: 8px;
-        background: #ffffff;
-        color: #6b7280;
-        transition: .2s;
-    }
-
-        .task-action:hover {
-            color: #111827;
-            border-color: #9ca3af;
-            background: #f9fafb;
-        }
-
-        .task-action.delete:hover {
-            color: #dc2626;
-            border-color: #fecaca;
-            background: #fef2f2;
-        }
-
-    .empty-state {
-        padding: 80px 25px;
-        text-align: center;
-        background: #ffffff;
-        border: 1px dashed #d1d5db;
-        border-radius: 16px;
-    }
-
-    .empty-icon {
-        width: 65px;
-        height: 65px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin: 0 auto 20px;
-        color: #4f46e5;
-        background: #eef2ff;
-        border-radius: 16px;
-        font-size: 28px;
-    }
-
-    .pagination .page-link {
-        margin: 0 3px;
-        color: #374151;
-        border: 1px solid #e5e7eb;
-        border-radius: 8px !important;
-    }
-
-    .pagination .page-item.active .page-link {
-        color: #ffffff;
-        background: #111827;
-        border-color: #111827;
-    }
-
-
-    @@media(max-width: 767px) {
-        .dashboard-page {
-           width: calc(100% - 24px);
-            padding-top: 25px;
-        }
-
-        .dashboard-heading h1 {
-            font-size: 30px;
-        }
-
-        .dashboard-actions {
-            width: 100%;
-        }
-
-            .dashboard-actions .btn {
-                flex: 1;
-            }
-    }
-</style>
-
-<div class="dashboard-page">
-
-   
-
-    <!-- HEADER -->
-
-    <div class="d-flex flex-wrap justify-content-between align-items-center gap-4 mb-5">
-
-        <div class="dashboard-heading">
-
-            <h1>Dashboard</h1>
-
-            <p>
-                Manage your tasks and keep your priorities clear.
-            </p>
-
-        </div>
-
-        <div class="d-flex flex-wrap gap-2 dashboard-actions">
-
-            @if (User.IsInRole("Admin"))
-            {
-                <a asp-controller="Admin"
-                   asp-action="Index"
-                   class="btn btn-outline-dark dashboard-btn">
-
-                    <i class="bi bi-shield-lock me-2"></i>
-                    Admin
+                    AI Planner
 
                 </a>
-            }
 
-            <a asp-controller="Task"
-               asp-action="AiBreakdown"
-               class="btn btn-outline-dark dashboard-btn">
+                <a asp-controller="Task"
+                   asp-action="Create"
+                   class="btn btn-primary">
 
-                <i class="bi bi-stars me-2"></i>
-                AI Planner
+                    <i class="bi bi-plus-lg me-2"></i>
 
-            </a>
+                    New Task
 
-            <a asp-controller="Task"
-               asp-action="Create"
-               class="btn btn-dark dashboard-btn">
-
-                <i class="bi bi-plus-lg me-2"></i>
-                New Task
-
-            </a>
-
-        </div>
-
-    </div>
-
-
-    <!-- STATISTICS -->
-
-    <div class="row g-4 mb-5">
-
-        <div class="col-6 col-lg-3">
-
-            <div class="stat-card">
-
-                <div class="stat-icon icon-total">
-                    <i class="bi bi-list-check"></i>
-                </div>
-
-                <div class="stat-label mt-3">
-                    Total Tasks
-                </div>
-
-                <h2 class="stat-number">
-                    @ViewBag.TotalTasks
-                </h2>
+                </a>
 
             </div>
 
         </div>
 
-        <div class="col-6 col-lg-3">
+        <div class="row g-3 mb-4">
 
-            <div class="stat-card">
+            <div class="col-6 col-lg-3">
 
-                <div class="stat-icon icon-completed">
-                    <i class="bi bi-check2-circle"></i>
-                </div>
+                <div class="stat-card">
 
-                <div class="stat-label mt-3">
-                    Completed
-                </div>
+                    <div class="stat-title">
 
-                <h2 class="stat-number">
-                    @ViewBag.CompletedTasks
-                </h2>
+                        Total Tasks
 
-            </div>
+                    </div>
 
-        </div>
+                    <div class="stat-value">
 
-        <div class="col-6 col-lg-3">
+                        @ViewBag.TotalTasks
 
-            <div class="stat-card">
-
-                <div class="stat-icon icon-pending">
-                    <i class="bi bi-clock"></i>
-                </div>
-
-                <div class="stat-label mt-3">
-                    Pending
-                </div>
-
-                <h2 class="stat-number">
-                    @ViewBag.PendingTasks
-                </h2>
-
-            </div>
-
-        </div>
-
-        <div class="col-6 col-lg-3">
-
-            <div class="stat-card">
-
-                <div class="stat-icon icon-overdue">
-                    <i class="bi bi-exclamation-triangle"></i>
-                </div>
-
-                <div class="stat-label mt-3">
-                    Overdue
-                </div>
-
-                <h2 class="stat-number">
-                    @ViewBag.OverdueTasks
-                </h2>
-
-            </div>
-
-        </div>
-
-    </div>
-
-
-    <!-- FILTERS -->
-
-    <form method="get"
-          asp-controller="Task"
-          asp-action="Index"
-          class="filter-panel mb-5">
-
-        <div class="row g-3 align-items-center">
-
-            <div class="col-lg-5">
-
-                <div class="input-group">
-
-                    <span class="input-group-text bg-white border-end-0">
-                        <i class="bi bi-search text-muted"></i>
-                    </span>
-
-                    <input type="text"
-                           name="search"
-                           value="@ViewBag.Search"
-                           class="form-control border-start-0"
-                           placeholder="Search tasks..." />
+                    </div>
 
                 </div>
 
             </div>
 
-            <div class="col-md-4 col-lg-2">
+            <div class="col-6 col-lg-3">
 
-                <select name="status"
-                        class="form-select">
+                <div class="stat-card">
 
-                    <option value="">
-                        All status
-                    </option>
+                    <div class="stat-title">
 
-                    <option value="Pending"
-                            selected="@(ViewBag.Status == "Pending")">
+                        Completed
+
+                    </div>
+
+                    <div class="stat-value text-success">
+
+                        @ViewBag.CompletedTasks
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="col-6 col-lg-3">
+
+                <div class="stat-card">
+
+                    <div class="stat-title">
+
                         Pending
-                    </option>
 
-                    <option value="Done"
-                            selected="@(ViewBag.Status == "Done")">
-                        Done
-                    </option>
+                    </div>
 
-                </select>
+                    <div class="stat-value text-warning">
 
-            </div>
+                        @ViewBag.PendingTasks
 
-            <div class="col-md-4 col-lg-2">
+                    </div>
 
-                <select name="priority"
-                        class="form-select">
-
-                    <option value="">
-                        All priority
-                    </option>
-
-                    <option value="Low"
-                            selected="@(ViewBag.Priority == "Low")">
-                        Low
-                    </option>
-
-                    <option value="Medium"
-                            selected="@(ViewBag.Priority == "Medium")">
-                        Medium
-                    </option>
-
-                    <option value="High"
-                            selected="@(ViewBag.Priority == "High")">
-                        High
-                    </option>
-
-                </select>
+                </div>
 
             </div>
 
-            <div class="col-md-4 col-lg-3">
+            <div class="col-6 col-lg-3">
 
-                <div class="d-flex gap-2">
+                <div class="stat-card">
 
-                    <button type="submit"
-                            class="btn btn-dark flex-grow-1">
+                    <div class="stat-title">
 
-                        Apply filters
+                        Overdue
 
-                    </button>
+                    </div>
 
-                    <a asp-controller="Task"
-                       asp-action="Index"
-                       class="btn btn-outline-secondary">
+                    <div class="stat-value text-danger">
 
-                        <i class="bi bi-arrow-counterclockwise"></i>
+                        @ViewBag.OverdueTasks
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+                <!-- FILTERS -->
+
+        <div class="card mb-4">
+
+            <div class="card-body">
+
+                <form asp-action="Index"
+                      method="get">
+
+                    <div class="row g-3">
+
+                        <div class="col-lg-5">
+
+                            <input type="text"
+                                   name="search"
+                                   value="@ViewBag.Search"
+                                   class="form-control"
+                                   placeholder="Search tasks..." />
+
+                        </div>
+
+                        <div class="col-lg-2">
+
+                            <select name="status"
+                                    class="form-select">
+
+                                <option value="">All Status</option>
+
+                                <option value="Pending"
+                                        selected="@(ViewBag.Status == "Pending")">
+
+                                    Pending
+
+                                </option>
+
+                                <option value="Done"
+                                        selected="@(ViewBag.Status == "Done")">
+
+                                    Done
+
+                                </option>
+
+                            </select>
+
+                        </div>
+
+                        <div class="col-lg-2">
+
+                            <select name="priority"
+                                    class="form-select">
+
+                                <option value="">All Priority</option>
+
+                                <option value="Low"
+                                        selected="@(ViewBag.Priority=="Low")">
+
+                                    Low
+
+                                </option>
+
+                                <option value="Medium"
+                                        selected="@(ViewBag.Priority=="Medium")">
+
+                                    Medium
+
+                                </option>
+
+                                <option value="High"
+                                        selected="@(ViewBag.Priority=="High")">
+
+                                    High
+
+                                </option>
+
+                            </select>
+
+                        </div>
+
+                        <div class="col-lg-3 d-flex gap-2">
+
+                            <button class="btn btn-primary flex-fill">
+
+                                Apply
+
+                            </button>
+
+                            <a asp-action="Index"
+                               class="btn btn-light">
+
+                                <i class="bi bi-arrow-clockwise"></i>
+
+                            </a>
+
+                        </div>
+
+                    </div>
+
+                </form>
+
+            </div>
+
+        </div>
+
+        <!-- TASKS -->
+
+        <div class="d-flex justify-content-between align-items-center mb-3">
+
+            <div>
+
+                <h3 class="section-title mb-1">
+
+                    My Tasks
+
+                </h3>
+
+                <small class="text-muted">
+
+                    @ViewBag.TotalTasks task@(ViewBag.TotalTasks == 1 ? "" : "s")
+
+                </small>
+
+            </div>
+
+        </div>
+
+        @if (!Model.Any())
+        {
+
+            <div class="empty-state">
+
+                <i class="bi bi-check2-square"></i>
+
+                <h3>
+
+                    No Tasks Found
+
+                </h3>
+
+                <p>
+
+                    Create a task manually or let AI generate one for you.
+
+                </p>
+
+                <div class="mt-4 d-flex justify-content-center gap-2 flex-wrap">
+
+                    <a asp-action="Create"
+                       class="btn btn-primary">
+
+                        Create Task
+
+                    </a>
+
+                    <a asp-action="AiBreakdown"
+                       class="btn btn-outline-primary">
+
+                        AI Planner
 
                     </a>
 
@@ -520,186 +312,118 @@
 
             </div>
 
-        </div>
+        }
+        else
+        {
 
-    </form>
+            <div class="row g-3">
+                @foreach (var task in Model)
+                {
+                    var isOverdue =
+                        task.Status != "Done" &&
+                        task.DueDate.Date < DateTime.UtcNow.Date;
 
+                    var priorityClass =
+                        task.Priority == "High"
+                            ? "priority-high"
+                            : task.Priority == "Medium"
+                                ? "priority-medium"
+                                : "priority-low";
 
-    <!-- TASK HEADER -->
+                    var statusClass =
+                        task.Status == "Done"
+                            ? "status-done"
+                            : "status-pending";
 
-    <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div class="col-lg-4 col-md-6">
 
-        <div>
+                        <div class="task-card">
 
-            <h4 class="fw-bold mb-1">
-                Your tasks
-            </h4>
+                            <div class="d-flex justify-content-between align-items-start mb-3">
 
-            <p class="text-muted mb-0 small">
-                @ViewBag.TotalTasks task@(ViewBag.TotalTasks == 1 ? "" : "s") found
-            </p>
+                                <div>
 
-        </div>
+                                    <h5 class="task-title">
 
-    </div>
+                                        @task.Title
 
+                                    </h5>
 
-    <!-- TASKS -->
-    @if (Model.Count == 0)
-    {
-        <div class="empty-state">
+                                    <p class="task-description mb-0">
 
-            <div class="empty-icon">
-                <i class="bi bi-check2-square"></i>
-            </div>
+                                        @(string.IsNullOrWhiteSpace(task.Description)
+                                            ? "No description provided."
+                                            : task.Description)
 
-            <h3 class="fw-bold">
-                No tasks found
-            </h3>
+                                    </p>
 
-            <p class="text-muted">
-                Create your first task or let AI build a plan for you.
-            </p>
+                                </div>
 
-            <div class="d-flex justify-content-center flex-wrap gap-2 mt-4">
+                                <span class="badge @statusClass">
 
-                <a asp-controller="Task"
-                   asp-action="Create"
-                   class="btn btn-dark">
-
-                    <i class="bi bi-plus-lg me-2"></i>
-                    Create Task
-
-                </a>
-
-                <a asp-controller="Task"
-                   asp-action="AiBreakdown"
-                   class="btn btn-outline-dark">
-
-                    <i class="bi bi-stars me-2"></i>
-                    Use AI Planner
-
-                </a>
-
-            </div>
-
-        </div>
-    }
-    else
-    {
-        <div class="row g-4">
-
-            @foreach (var task in Model)
-            {
-                var isOverdue =
-                    task.Status != "Done" &&
-                    task.DueDate.Date < DateTime.UtcNow.Date;
-
-                var statusClass =
-                    task.Status == "Done"
-                        ? "status-done"
-                        : "status-pending";
-
-                var priorityClass =
-                    task.Priority == "High"
-                        ? "priority-high"
-                        : task.Priority == "Medium"
-                            ? "priority-medium"
-                            : "priority-low";
-
-                <div class="col-md-6 col-xl-4">
-
-                    <div class="task-card">
-
-                        <div class="d-flex justify-content-between align-items-start gap-3">
-
-                            <h5 class="task-title mb-0">
-                                @task.Title
-                            </h5>
-
-                            <span class="status-badge @statusClass">
-
-                                @if (task.Status == "Done")
-                                {
-                                    <i class="bi bi-check-circle me-1"></i>
-                                }
-                                else
-                                {
-                                    <i class="bi bi-clock me-1"></i>
-                                }
-
-                                @task.Status
-
-                            </span>
-
-                        </div>
-
-                        <p class="task-description">
-
-                            @(string.IsNullOrWhiteSpace(task.Description)
-                                ? "No description provided for this task."
-                                : task.Description)
-
-                        </p>
-
-                        <div class="d-flex flex-wrap gap-2">
-
-                            <span class="priority-badge @priorityClass">
-
-                                <i class="bi bi-flag me-1"></i>
-
-                                @task.Priority priority
-
-                            </span>
-
-                            @if (isOverdue)
-                            {
-                                <span class="overdue-badge">
-
-                                    <i class="bi bi-exclamation-circle me-1"></i>
-
-                                    Overdue
+                                    @task.Status
 
                                 </span>
-                            }
 
-                        </div>
+                            </div>
 
-                        <div class="task-meta d-flex justify-content-between align-items-center">
+                            <div class="task-meta mb-3">
 
-                            <div class="due-date @(isOverdue ? "overdue" : "")">
+                                <span class="badge @priorityClass">
 
-                                <i class="bi bi-calendar3 me-2"></i>
+                                    @task.Priority
 
-                                @task.DueDate.ToString("dd MMM yyyy")
+                                </span>
+
+                                @if (isOverdue)
+                                {
+                                    <span class="badge bg-danger">
+
+                                        Overdue
+
+                                    </span>
+                                }
+
+                            </div>
+
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+
+                                <small class="text-muted">
+
+                                    <i class="bi bi-calendar3 me-1"></i>
+
+                                    @task.DueDate.ToString("dd MMM yyyy")
+
+                                </small>
 
                             </div>
 
                             <div class="d-flex gap-2">
 
-                                <a asp-controller="Task"
-                                   asp-action="Edit"
+                                <a asp-action="Edit"
                                    asp-route-id="@task.Id"
-                                   class="task-action"
-                                   title="Edit task">
+                                   class="btn btn-outline-primary btn-sm flex-fill">
 
-                                    <i class="bi bi-pencil"></i>
+                                    <i class="bi bi-pencil me-1"></i>
+
+                                    Edit
 
                                 </a>
 
-                                <form asp-controller="Task"
-                                      asp-action="Delete"
+                                <form asp-action="Delete"
                                       asp-route-id="@task.Id"
                                       method="post"
+                                      class="flex-fill"
                                       onsubmit="return confirm('Delete this task?');">
 
                                     @Html.AntiForgeryToken()
 
                                     <button type="submit"
-                                            class="task-action delete"
-                                            title="Delete task">
+                                            class="btn btn-danger btn-sm w-100">
 
-                                        <i class="bi bi-trash3"></i>
+                                        <i class="bi bi-trash me-1"></i>
+
+                                        Delete
 
                                     </button>
 
@@ -710,82 +434,82 @@
                         </div>
 
                     </div>
-
-                </div>
-            }
-
-        </div>
-    }
-
-
-    <!-- PAGINATION -->
-    @if (ViewBag.TotalPages > 1)
-    {
-        <nav class="mt-5">
-
-            <ul class="pagination justify-content-center">
-
-                @if (ViewBag.CurrentPage > 1)
-                {
-                    <li class="page-item">
-
-                        <a class="page-link"
-                           asp-action="Index"
-                           asp-route-page="@(ViewBag.CurrentPage - 1)"
-                           asp-route-search="@ViewBag.Search"
-                           asp-route-status="@ViewBag.Status"
-                           asp-route-priority="@ViewBag.Priority">
-
-                            <i class="bi bi-chevron-left"></i>
-
-                        </a>
-
-                    </li>
                 }
 
-                @for (int i = 1; i <= ViewBag.TotalPages; i++)
-                {
-                    <li class="page-item @(i == ViewBag.CurrentPage ? "active" : "")">
+            </div>
+        }
 
-                        <a class="page-link"
-                           asp-action="Index"
-                           asp-route-page="@i"
-                           asp-route-search="@ViewBag.Search"
-                           asp-route-status="@ViewBag.Status"
-                           asp-route-priority="@ViewBag.Priority">
+        @if (ViewBag.TotalPages > 1)
+        {
 
-                            @i
+            <nav class="mt-5">
 
-                        </a>
+                <ul class="pagination justify-content-center">
 
-                    </li>
-                }
+                    @if (ViewBag.CurrentPage > 1)
+                    {
+                        <li class="page-item">
 
-                @if (ViewBag.CurrentPage < ViewBag.TotalPages)
-                {
-                    <li class="page-item">
+                            <a class="page-link"
+                               asp-action="Index"
+                               asp-route-page="@(ViewBag.CurrentPage - 1)"
+                               asp-route-search="@ViewBag.Search"
+                               asp-route-status="@ViewBag.Status"
+                               asp-route-priority="@ViewBag.Priority">
 
-                        <a class="page-link"
-                           asp-action="Index"
-                           asp-route-page="@(ViewBag.CurrentPage + 1)"
-                           asp-route-search="@ViewBag.Search"
-                           asp-route-status="@ViewBag.Status"
-                           asp-route-priority="@ViewBag.Priority">
+                                <i class="bi bi-chevron-left"></i>
 
-                            <i class="bi bi-chevron-right"></i>
+                            </a>
 
-                        </a>
+                        </li>
+                    }
 
-                    </li>
-                }
+                    @for (int i = 1; i <= ViewBag.TotalPages; i++)
+                    {
 
-            </ul>
+                        <li class="page-item @(i == ViewBag.CurrentPage ? "active" : "")">
 
-        </nav>
-    }
+                            <a class="page-link"
+                               asp-action="Index"
+                               asp-route-page="@i"
+                               asp-route-search="@ViewBag.Search"
+                               asp-route-status="@ViewBag.Status"
+                               asp-route-priority="@ViewBag.Priority">
+
+                                @i
+
+                            </a>
+
+                        </li>
+
+                    }
+
+                    @if (ViewBag.CurrentPage < ViewBag.TotalPages)
+                    {
+
+                        <li class="page-item">
+
+                            <a class="page-link"
+                               asp-action="Index"
+                               asp-route-page="@(ViewBag.CurrentPage + 1)"
+                               asp-route-search="@ViewBag.Search"
+                               asp-route-status="@ViewBag.Status"
+                               asp-route-priority="@ViewBag.Priority">
+
+                                <i class="bi bi-chevron-right"></i>
+
+                            </a>
+
+                        </li>
+
+                    }
+
+                </ul>
+
+            </nav>
+
+        }
+
+    </div>
 
 </div>
-
-        
-   
-}

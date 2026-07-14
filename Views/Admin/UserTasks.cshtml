@@ -4,408 +4,188 @@
     ViewData["Title"] = "User Tasks";
 }
 
-<style>
-    .user-tasks-page {
-        max-width: 1320px;
-        width: calc(100% - 40px);
-        margin: 0 auto;
-        padding: 45px 0 80px;
-    }
+<div class="page">
 
-    .page-header h1 {
-        color: #111827;
-        font-size: 38px;
-        font-weight: 800;
-        letter-spacing: -1.5px;
-    }
+    <div class="container">
 
-    .page-header p {
-        color: #6b7280;
-        margin: 0;
-    }
+        <div class="page-header d-flex justify-content-between align-items-center flex-wrap gap-3">
 
-    .admin-label {
-        display: inline-flex;
-        align-items: center;
-        gap: 7px;
-        padding: 7px 12px;
-        margin-bottom: 15px;
-        color: #7c3aed;
-        background: #f5f3ff;
-        border-radius: 100px;
-        font-size: 12px;
-        font-weight: 700;
-    }
+            <div>
 
-    .task-count {
-        display: inline-flex;
-        align-items: center;
-        padding: 7px 12px;
-        color: #4b5563;
-        background: #f3f4f6;
-        border-radius: 100px;
-        font-size: 13px;
-        font-weight: 600;
-    }
+                <span class="badge bg-primary mb-3">
 
-    .admin-task-card {
-        height: 100%;
-        padding: 24px;
-        background: #ffffff;
-        border: 1px solid #e5e7eb;
-        border-radius: 14px;
-        transition: .25s;
-    }
+                    <i class="bi bi-shield-lock me-2"></i>
 
-        .admin-task-card:hover {
-            transform: translateY(-4px);
-            border-color: #c7d2fe;
-            box-shadow: 0 18px 45px rgba(0, 0, 0, .06);
-        }
+                    ADMIN
 
-    .task-title {
-        color: #111827;
-        font-size: 18px;
-        font-weight: 700;
-    }
+                </span>
 
-    .task-description {
-        min-height: 48px;
-        margin: 14px 0 18px;
-        color: #6b7280;
-        font-size: 14px;
-        line-height: 1.7;
-    }
+                <h1 class="page-title">
 
-    .status-pill,
-    .priority-pill,
-    .overdue-pill {
-        display: inline-flex;
-        align-items: center;
-        gap: 5px;
-        padding: 6px 10px;
-        border-radius: 100px;
-        font-size: 12px;
-        font-weight: 600;
-    }
+                    @ViewBag.Username's Tasks
 
-    .status-done {
-        color: #047857;
-        background: #ecfdf5;
-    }
+                </h1>
 
-    .status-pending {
-        color: #b45309;
-        background: #fffbeb;
-    }
+                <p class="page-subtitle">
 
-    .priority-high {
-        color: #b91c1c;
-        background: #fef2f2;
-    }
+                    Review tasks created by this user.
 
-    .priority-medium {
-        color: #4338ca;
-        background: #eef2ff;
-    }
-
-    .priority-low {
-        color: #4b5563;
-        background: #f3f4f6;
-    }
-
-    .overdue-pill {
-        color: #b91c1c;
-        background: #fef2f2;
-    }
-
-    .task-footer {
-        padding-top: 18px;
-        margin-top: 18px;
-        border-top: 1px solid #f3f4f6;
-    }
-
-    .due-date {
-        color: #6b7280;
-        font-size: 13px;
-    }
-
-        .due-date.overdue {
-            color: #dc2626;
-            font-weight: 600;
-        }
-
-    .task-action {
-        width: 36px;
-        height: 36px;
-        display: inline-flex;
-        justify-content: center;
-        align-items: center;
-        padding: 0;
-        color: #6b7280;
-        background: #ffffff;
-        border: 1px solid #e5e7eb;
-        border-radius: 8px;
-        transition: .2s;
-    }
-
-        .task-action:hover {
-            color: #111827;
-            background: #f9fafb;
-            border-color: #9ca3af;
-        }
-
-        .task-action.delete:hover {
-            color: #dc2626;
-            background: #fef2f2;
-            border-color: #fecaca;
-        }
-
-    .empty-state {
-        padding: 80px 25px;
-        text-align: center;
-        background: #ffffff;
-        border: 1px dashed #d1d5db;
-        border-radius: 16px;
-    }
-
-    .empty-icon {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        width: 65px;
-        height: 65px;
-        margin: 0 auto 20px;
-        color: #7c3aed;
-        background: #f5f3ff;
-        border-radius: 16px;
-        font-size: 27px;
-    }
-
-   
-
-    @@media(max-width: 767px) {
-        .user-tasks-page {
-            width: calc(100% - 24px);
-            padding-top: 30px;
-        }
-
-        .page-header h1 {
-            font-size: 30px;
-        }
-
- 
-    }
-</style>
-
-<div class="user-tasks-page">
-
-    <!-- HEADER -->
-
-    <div class="d-flex flex-wrap justify-content-between align-items-center gap-4 mb-5">
-
-        <div class="page-header">
-
-            <div class="admin-label">
-
-                <i class="bi bi-shield-lock"></i>
-
-                ADMIN TASK VIEW
+                </p>
 
             </div>
 
-            <h1>
-                @ViewBag.Username's Tasks
-            </h1>
+            <div class="d-flex gap-2">
 
-            <p>
-                Review and manage tasks created by this user.
-            </p>
+                <span class="badge bg-light text-dark fs-6">
 
-        </div>
+                    @Model.Count Task@(Model.Count == 1 ? "" : "s")
 
-        <div class="d-flex flex-wrap align-items-center gap-3">
+                </span>
 
-            <span class="task-count">
+                <a asp-action="Index"
+                   class="btn btn-light">
 
-                <i class="bi bi-list-check me-2"></i>
+                    <i class="bi bi-arrow-left me-2"></i>
 
-                @Model.Count task@(Model.Count == 1 ? "" : "s")
+                    Back
 
-            </span>
-
-            <a asp-controller="Admin"
-               asp-action="Index"
-               class="btn btn-outline-dark">
-
-                <i class="bi bi-arrow-left me-2"></i>
-
-                Admin Dashboard
-
-            </a>
-
-        </div>
-
-    </div>
-
-
-    <!-- TASKS -->
-    @if (!Model.Any())
-    {
-        <div class="empty-state">
-
-            <div class="empty-icon">
-
-                <i class="bi bi-inbox"></i>
+                </a>
 
             </div>
 
-            <h3 class="fw-bold">
-                No tasks found
-            </h3>
-
-            <p class="text-muted mb-4">
-                This user has not created any tasks yet.
-            </p>
-
-            <a asp-controller="Admin"
-               asp-action="Index"
-               class="btn btn-dark">
-
-                <i class="bi bi-arrow-left me-2"></i>
-
-                Back to users
-
-            </a>
-
         </div>
-    }
-    else
-    {
-        <div class="row g-4">
 
-            @foreach (var task in Model)
-            {
-                var isOverdue =
-                    task.Status != "Done" &&
-                    task.DueDate.Date < DateTime.UtcNow.Date;
+        @if (!Model.Any())
+        {
 
-                var statusClass =
-                    task.Status == "Done"
-                        ? "status-done"
-                        : "status-pending";
+            <div class="empty-state">
 
-                var priorityClass =
-                    task.Priority == "High"
+                <i class="bi bi-list-task"></i>
+
+                <h3>
+
+                    No Tasks
+
+                </h3>
+
+                <p>
+
+                    This user has not created any tasks yet.
+
+                </p>
+
+            </div>
+
+        }
+        else
+        {
+
+            <div class="row g-3">
+
+                @foreach (var task in Model)
+                {
+
+                    var overdue =
+                        task.Status != "Done" &&
+                        task.DueDate.Date < DateTime.UtcNow.Date;
+
+                    var priorityClass =
+                        task.Priority == "High"
                         ? "priority-high"
                         : task.Priority == "Medium"
                             ? "priority-medium"
                             : "priority-low";
 
-                <div class="col-md-6 col-xl-4">
+                    var statusClass =
+                        task.Status == "Done"
+                        ? "status-done"
+                        : "status-pending";
 
-                    <div class="admin-task-card">
+                    <div class="col-lg-4 col-md-6">
 
-                        <div class="d-flex justify-content-between align-items-start gap-3">
+                        <div class="task-card">
 
-                            <h5 class="task-title mb-0">
+                            <div class="d-flex justify-content-between mb-3">
 
-                                @task.Title
+                                <h5 class="task-title">
 
-                            </h5>
+                                    @task.Title
 
-                            <span class="status-pill @statusClass">
+                                </h5>
 
-                                @if (task.Status == "Done")
-                                {
-                                    <i class="bi bi-check-circle"></i>
-                                }
-                                else
-                                {
-                                    <i class="bi bi-clock"></i>
-                                }
+                                <span class="badge @statusClass">
 
-                                @task.Status
-
-                            </span>
-
-                        </div>
-
-
-                        <p class="task-description">
-
-                            @(string.IsNullOrWhiteSpace(task.Description)
-                                ? "No description provided for this task."
-                                : task.Description)
-
-                        </p>
-
-
-                        <div class="d-flex flex-wrap gap-2">
-
-                            <span class="priority-pill @priorityClass">
-
-                                <i class="bi bi-flag"></i>
-
-                                @task.Priority priority
-
-                            </span>
-
-                            @if (isOverdue)
-                            {
-                                <span class="overdue-pill">
-
-                                    <i class="bi bi-exclamation-circle"></i>
-
-                                    Overdue
+                                    @task.Status
 
                                 </span>
-                            }
-
-                        </div>
-
-
-                        <div class="task-footer d-flex justify-content-between align-items-center">
-
-                            <div class="due-date @(isOverdue ? "overdue" : "")">
-
-                                <i class="bi bi-calendar3 me-2"></i>
-
-                                @task.DueDate.ToString("dd MMM yyyy")
 
                             </div>
 
+                            <p class="task-description">
 
-                            <div class="d-flex gap-2">
+                                @(string.IsNullOrWhiteSpace(task.Description)
+                                    ? "No description."
+                                    : task.Description)
 
-                                <a asp-controller="Admin"
-                                   asp-action="EditTask"
-                                   asp-route-id="@task.Id"
-                                   class="task-action"
-                                   title="Edit task">
+                            </p>
 
-                                    <i class="bi bi-pencil"></i>
+                            <div class="d-flex gap-2 flex-wrap mb-3">
 
-                                </a>
+                                <span class="badge @priorityClass">
 
+                                    @task.Priority
 
-                                <form asp-controller="Admin"
-                                      asp-action="DeleteTask"
-                                      asp-route-id="@task.Id"
-                                      method="post"
-                                      onsubmit="return confirmDeleteTask();">
+                                </span>
 
-                                    @Html.AntiForgeryToken()
+                                @if (overdue)
+                                {
 
-                                    <button type="submit"
-                                            class="task-action delete"
-                                            title="Delete task">
+                                    <span class="badge bg-danger">
 
-                                        <i class="bi bi-trash3"></i>
+                                        Overdue
 
-                                    </button>
+                                    </span>
 
-                                </form>
+                                }
+
+                            </div>
+
+                            <div class="d-flex justify-content-between align-items-center">
+
+                                <small class="text-muted">
+
+                                    <i class="bi bi-calendar3 me-1"></i>
+
+                                    @task.DueDate.ToString("dd MMM yyyy")
+
+                                </small>
+
+                                <div class="d-flex gap-2">
+
+                                    <a asp-action="EditTask"
+                                       asp-route-id="@task.Id"
+                                       class="btn btn-outline-primary btn-sm">
+
+                                        Edit
+
+                                    </a>
+
+                                    <form asp-action="DeleteTask"
+                                          asp-route-id="@task.Id"
+                                          method="post"
+                                          onsubmit="return confirmDeleteTask();">
+
+                                        @Html.AntiForgeryToken()
+
+                                        <button class="btn btn-outline-danger btn-sm">
+
+                                            Delete
+
+                                        </button>
+
+                                    </form>
+
+                                </div>
 
                             </div>
 
@@ -413,28 +193,26 @@
 
                     </div>
 
-                </div>
-            }
+                }
 
-        </div>
-    }
-
-</div>
-
-
-@section Scripts
-{
-    <script>
-
-        function confirmDeleteTask() {
-
-            return confirm(
-                "Delete this user task permanently?"
-            );
+            </div>
 
         }
 
+    </div>
 
+</div>
+
+@section Scripts {
+
+    <script>
+
+        function confirmDeleteTask(){
+
+        return confirm("Delete this task permanently?");
+
+        }
 
     </script>
+
 }

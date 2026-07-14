@@ -1,837 +1,337 @@
-﻿<!DOCTYPE html>
+﻿@using Microsoft.AspNetCore.Identity
+
+<!DOCTYPE html>
+
 <html lang="en">
 
 <head>
 
-    <meta charset="utf-8" />
+    <meta charset="utf-8"/>
 
     <meta name="viewport"
-          content="width=device-width, initial-scale=1" />
+          content="width=device-width, initial-scale=1"/>
 
     <title>@ViewData["Title"] - TaskFlow</title>
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
-          rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+          rel="stylesheet"/>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css"
-          rel="stylesheet" />
+          rel="stylesheet"/>
+
+    <link rel="preconnect"
+          href="https://fonts.googleapis.com"/>
+
+    <link rel="preconnect"
+          href="https://fonts.gstatic.com"
+          crossorigin/>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+          rel="stylesheet"/>
 
     <link href="~/css/site.css"
           rel="stylesheet"
-          asp-append-version="true" />
-
-    <style>
-
-            html {
-                scroll-behavior: smooth;
-            }
-
-            body {
-                margin: 0;
-                color: #111827;
-                background: #ffffff;
-                font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-            }
-
-            /* NAVBAR */
-
-            .app-navbar {
-                min-height: 72px;
-                background: rgba(255, 255, 255, .92);
-                border-bottom: 1px solid #e5e7eb;
-                backdrop-filter: blur(14px);
-            }
-
-                .app-navbar .container {
-                    max-width: 1320px;
-                }
-
-            .brand-logo {
-                display: flex;
-                align-items: center;
-                gap: 10px;
-                color: #111827;
-                font-size: 20px;
-                font-weight: 800;
-                letter-spacing: -.7px;
-                text-decoration: none;
-            }
-
-                .brand-logo:hover {
-                    color: #111827;
-                }
-
-            .brand-icon {
-                width: 35px;
-                height: 35px;
-                display: inline-flex;
-                justify-content: center;
-                align-items: center;
-                color: #ffffff;
-                background: #111827;
-                border-radius: 9px;
-            }
-
-            .app-nav-link {
-                padding: 8px 13px !important;
-                color: #6b7280 !important;
-                border-radius: 8px;
-                font-size: 14px;
-                font-weight: 500;
-                transition: .2s;
-            }
-
-                .app-nav-link:hover {
-                    color: #111827 !important;
-                    background: #f3f4f6;
-                }
-
-            .ai-nav-link {
-                color: #4f46e5 !important;
-            }
-
-            .admin-nav-link {
-                color: #7c3aed !important;
-            }
-
-            /* USER */
-
-            .user-menu {
-                padding: 6px 9px !important;
-                color: #111827 !important;
-                border-radius: 9px;
-            }
-
-                .user-menu:hover {
-                    background: #f3f4f6;
-                }
-
-            .user-avatar {
-                width: 34px;
-                height: 34px;
-                display: inline-flex;
-                justify-content: center;
-                align-items: center;
-                color: #4338ca;
-                background: #eef2ff;
-                border-radius: 9px;
-                font-size: 13px;
-                font-weight: 700;
-            }
-
-            .username-text {
-                max-width: 150px;
-                overflow: hidden;
-                font-size: 14px;
-                font-weight: 600;
-                text-overflow: ellipsis;
-                white-space: nowrap;
-            }
-
-            .user-dropdown {
-                min-width: 220px;
-                padding: 8px;
-                margin-top: 10px !important;
-                border: 1px solid #e5e7eb;
-                border-radius: 12px;
-                box-shadow: 0 18px 50px rgba(0, 0, 0, .1);
-            }
-
-            .dropdown-user-info {
-                padding: 10px 12px;
-            }
-
-                .dropdown-user-info small {
-                    color: #9ca3af;
-                }
-
-                .dropdown-user-info strong {
-                    display: block;
-                    margin-top: 2px;
-                    overflow: hidden;
-                    font-size: 14px;
-                    text-overflow: ellipsis;
-                }
-
-            .logout-link {
-                padding: 9px 12px;
-                color: #dc2626;
-                border-radius: 8px;
-                font-size: 14px;
-                font-weight: 500;
-            }
-
-                .logout-link:hover {
-                    color: #b91c1c;
-                    background: #fef2f2;
-                }
-
-            .main-content {
-                min-height: calc(100vh - 72px);
-            }
-
-
-            /* =========================
-                       MODERN TOAST SYSTEM
-                    ========================= */
-
-            .toast-container-app {
-                position: fixed;
-                top: 92px;
-                right: 24px;
-                z-index: 9999;
-                width: 100%;
-                max-width: 390px;
-                pointer-events: none;
-            }
-
-            .app-toast {
-                position: relative;
-                display: flex;
-                align-items: flex-start;
-                gap: 13px;
-                padding: 16px 42px 18px 16px;
-                margin-bottom: 12px;
-                overflow: hidden;
-                background: rgba(255, 255, 255, .97);
-                border: 1px solid #e5e7eb;
-                border-radius: 13px;
-                box-shadow: 0 20px 50px rgba(17, 24, 39, .12), 0 2px 8px rgba(17, 24, 39, .05);
-                backdrop-filter: blur(16px);
-                pointer-events: auto;
-                animation: toastSlideIn .4s cubic-bezier(.16, 1, .3, 1);
-            }
-
-                .app-toast.toast-hide {
-                    animation: toastSlideOut .3s ease forwards;
-                }
-
-            .toast-icon {
-                width: 38px;
-                height: 38px;
-                flex-shrink: 0;
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                border-radius: 10px;
-                font-size: 18px;
-            }
-
-            .toast-success .toast-icon {
-                color: #047857;
-                background: #ecfdf5;
-            }
-
-            .toast-error .toast-icon {
-                color: #dc2626;
-                background: #fef2f2;
-            }
-
-            .toast-warning .toast-icon {
-                color: #b45309;
-                background: #fffbeb;
-            }
-
-            .toast-info .toast-icon {
-                color: #4338ca;
-                background: #eef2ff;
-            }
-
-            .toast-content {
-                flex: 1;
-                min-width: 0;
-            }
-
-            .toast-title {
-                margin-bottom: 3px;
-                color: #111827;
-                font-size: 14px;
-                font-weight: 700;
-            }
-
-            .toast-message {
-                margin: 0;
-                color: #6b7280;
-                font-size: 13px;
-                line-height: 1.5;
-                word-break: break-word;
-            }
-
-            .toast-close {
-                position: absolute;
-                top: 13px;
-                right: 13px;
-                padding: 3px;
-                color: #9ca3af;
-                background: transparent;
-                border: none;
-                font-size: 15px;
-                line-height: 1;
-            }
-
-                .toast-close:hover {
-                    color: #111827;
-                }
-
-            .toast-progress {
-                position: absolute;
-                bottom: 0;
-                left: 0;
-                width: 100%;
-                height: 3px;
-                transform-origin: left;
-                animation: toastProgress 5s linear forwards;
-            }
-
-            .toast-success .toast-progress {
-                background: #10b981;
-            }
-
-            .toast-error .toast-progress {
-                background: #ef4444;
-            }
-
-            .toast-warning .toast-progress {
-                background: #f59e0b;
-            }
-
-            .toast-info .toast-progress {
-                background: #6366f1;
-            }
-
-            @@keyframes toastSlideIn {
-
-                from {
-                    opacity: 0;
-                    transform: translateX(35px) scale(.96);
-                }
-
-                to {
-                    opacity: 1;
-                    transform: translateX(0) scale(1);
-                }
-            }
-
-            @@keyframes toastSlideOut {
-
-                from {
-                    opacity: 1;
-                    transform: translateX(0);
-                }
-
-                to {
-                    opacity: 0;
-                    transform: translateX(40px);
-                }
-            }
-
-            @@keyframes toastProgress {
-
-                from {
-                    transform: scaleX(1);
-                }
-
-                to {
-                    transform: scaleX(0);
-                }
-            }
-
-
-            /* FOOTER */
-
-            .app-footer {
-                padding: 55px 0 30px;
-                background: #ffffff;
-                border-top: 1px solid #e5e7eb;
-            }
-
-            .footer-wrapper {
-                max-width: 1320px;
-            }
-
-            .footer-brand {
-                color: #111827;
-                font-size: 18px;
-                font-weight: 800;
-            }
-
-            .footer-description {
-                max-width: 470px;
-                margin-top: 12px;
-                color: #6b7280;
-                font-size: 14px;
-                line-height: 1.7;
-            }
-
-            .footer-tech {
-                color: #9ca3af;
-                font-size: 12px;
-            }
-
-            .footer-bottom {
-                padding-top: 25px;
-                margin-top: 35px;
-                border-top: 1px solid #f3f4f6;
-                color: #9ca3af;
-                font-size: 13px;
-            }
-
-
-            @@media(max-width: 991px) {
-
-                .app-navbar {
-                    padding: 12px 0;
-                }
-
-                .navbar-collapse {
-                    padding-top: 15px;
-                }
-
-                .navbar-nav {
-                    align-items: stretch !important;
-                }
-            }
-
-
-            @@media(max-width: 576px) {
-
-                .toast-container-app {
-                    top: 82px;
-                    left: 12px;
-                    right: 12px;
-                    width: auto;
-                    max-width: none;
-                }
-
-                .app-toast {
-                    width: 100%;
-                }
-            }
-
-    </style>
+          asp-append-version="true"/>
 
 </head>
 
-
 <body>
 
+<header class="app-header">
 
-    <!-- GLOBAL TOASTS -->
+<nav class="navbar navbar-expand-lg py-3">
 
-    <div class="toast-container-app"
-         id="toastContainer">
+    <div class="container-fluid navbar-container">
 
-        @if (TempData["Success"] != null)
-        {
-            <div class="app-toast toast-success">
+<a asp-controller="Home"
+   asp-action="Index"
+   class="navbar-brand">
 
-                <div class="toast-icon">
+<i class="bi bi-check2-square-fill text-primary me-2"></i>
 
-                    <i class="bi bi-check2"></i>
+TaskFlow
 
-                </div>
+</a>
 
-                <div class="toast-content">
+<button class="navbar-toggler border-0 shadow-none"
+        data-bs-toggle="collapse"
+        data-bs-target="#navbar">
 
-                    <div class="toast-title">
-                        Success
-                    </div>
+<span class="navbar-toggler-icon"></span>
 
-                    <p class="toast-message">
-                        @TempData["Success"]
-                    </p>
+</button>
 
-                </div>
+<div class="collapse navbar-collapse"
+     id="navbar">
+
+@if(User.Identity?.IsAuthenticated==true)
+{
+
+<ul class="navbar-nav ms-auto align-items-lg-center gap-lg-2">
+
+<li class="nav-item">
+
+<a asp-controller="Task"
+   asp-action="Index"
+   class="nav-link">
+
+Dashboard
+
+</a>
+
+</li>
+
+<li class="nav-item">
+
+<a asp-controller="Project"
+   asp-action="Index"
+   class="nav-link">
+
+Projects
+
+</a>
+
+</li>
+
+<li class="nav-item">
+
+<a asp-controller="Task"
+   asp-action="AiBreakdown"
+   class="nav-link">
+
+AI Planner
+
+</a>
+
+</li>
+
+@if(!User.IsInRole("Admin"))
+{
+
+<li class="nav-item">
+
+<a asp-controller="Project"
+   asp-action="Invitations"
+   class="nav-link">
+
+Invitations
+
+</a>
+
+</li>
+
+}
+
+@if(User.IsInRole("Admin"))
+{
+
+<li class="nav-item">
+
+<a asp-controller="Admin"
+   asp-action="Index"
+   class="nav-link">
+
+Admin
+
+</a>
+
+</li>
+
+}
+
+<li class="nav-item dropdown ms-lg-3">
+
+<a class="nav-link dropdown-toggle d-flex align-items-center gap-2"
+   data-bs-toggle="dropdown"
+   href="#">
+
+<div class="avatar">
+
+@(string.IsNullOrWhiteSpace(User.Identity?.Name)
+?"?"
+:User.Identity.Name.Substring(0,1).ToUpper())
+
+</div>
+
+<span>
+
+@User.Identity?.Name
+
+</span>
+
+</a>
+
+<ul class="dropdown-menu dropdown-menu-end shadow border-0">
+
+<li>
+
+<h6 class="dropdown-header">
+
+Account
+
+</h6>
+
+</li>
+
+<li>
+
+<span class="dropdown-item-text">
+
+@User.Identity?.Name
+
+</span>
+
+</li>
+
+<li>
+
+<hr class="dropdown-divider"/>
+
+</li>
+
+<li>
+
+<a asp-controller="Home"
+   asp-action="Logout"
+   class="dropdown-item text-danger">
+
+<i class="bi bi-box-arrow-right me-2"></i>
+
+Logout
+
+</a>
+
+</li>
+
+</ul>
+
+</li>
+
+</ul>
+
+}
+else
+{
+
+<ul class="navbar-nav ms-auto align-items-center">
+
+<li class="nav-item">
+
+<a href="/#features"
+   class="nav-link">
+
+Features
+
+</a>
+
+</li>
+
+<li class="nav-item">
+
+<a href="/#about"
+   class="nav-link">
+
+About
+
+</a>
+
+</li>
+
+<li class="nav-item ms-lg-3">
+
+<a href="/#login"
+   class="btn btn-primary px-4">
+
+Get Started
+
+</a>
+
+</li>
+
+</ul>
+
+}
+
+</div>
+
+</div>
+
+</nav>
+
+</header>
+
+<main class="app-main">
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="container pt-3">
+
+            <div class="alert alert-success alert-dismissible fade show">
+
+                @TempData["Success"]
 
                 <button type="button"
-                        class="toast-close"
-                        onclick="closeToast(this)">
-
-                    <i class="bi bi-x-lg"></i>
-
+                        class="btn-close"
+                        data-bs-dismiss="alert">
                 </button>
-
-                <div class="toast-progress"></div>
-
-            </div>
-        }
-
-
-        @if (TempData["Error"] != null)
-        {
-            <div class="app-toast toast-error">
-
-                <div class="toast-icon">
-
-                    <i class="bi bi-exclamation"></i>
-
-                </div>
-
-                <div class="toast-content">
-
-                    <div class="toast-title">
-                        Something went wrong
-                    </div>
-
-                    <p class="toast-message">
-                        @TempData["Error"]
-                    </p>
-
-                </div>
-
-                <button type="button"
-                        class="toast-close"
-                        onclick="closeToast(this)">
-
-                    <i class="bi bi-x-lg"></i>
-
-                </button>
-
-                <div class="toast-progress"></div>
-
-            </div>
-        }
-
-    </div>
-
-
-    <!-- NAVBAR -->
-
-    <nav class="navbar navbar-expand-lg app-navbar sticky-top">
-
-        <div class="container">
-
-            <a class="brand-logo"
-               asp-controller="Home"
-               asp-action="Index">
-
-                <span class="brand-icon">
-
-                    <i class="bi bi-check2"></i>
-
-                </span>
-
-                TaskFlow
-
-            </a>
-
-
-            <button class="navbar-toggler border-0 shadow-none"
-                    type="button"
-                    data-bs-toggle="collapse"
-                    data-bs-target="#taskFlowNavbar"
-                    aria-controls="taskFlowNavbar"
-                    aria-expanded="false"
-                    aria-label="Toggle navigation">
-
-                <span class="navbar-toggler-icon"></span>
-
-            </button>
-
-
-            <div class="collapse navbar-collapse"
-                 id="taskFlowNavbar">
-
-                <ul class="navbar-nav ms-auto align-items-center gap-lg-1">
-
-                    @if (User.Identity?.IsAuthenticated == true)
-                    {
-                        <li class="nav-item">
-
-                            <a class="nav-link app-nav-link"
-                               asp-controller="Task"
-                               asp-action="Index">
-
-                                <i class="bi bi-grid me-1"></i>
-                                Dashboard
-
-                            </a>
-
-                        </li>
-
-                        <li class="nav-item">
-
-                            <a class="nav-link app-nav-link ai-nav-link"
-                               asp-controller="Task"
-                               asp-action="AiBreakdown">
-
-                                <i class="bi bi-stars me-1"></i>
-                                AI Assistant
-
-                            </a>
-
-                        </li>
-
-                        @if (User.IsInRole("Admin"))
-                        {
-                            <li class="nav-item">
-
-                                <a class="nav-link app-nav-link admin-nav-link"
-                                   asp-controller="Admin"
-                                   asp-action="Index">
-
-                                    <i class="bi bi-shield-lock me-1"></i>
-                                    Admin
-
-                                </a>
-
-                            </li>
-                        }
-
-                        <li class="nav-item dropdown ms-lg-2">
-
-                            <a class="nav-link dropdown-toggle user-menu d-flex align-items-center gap-2"
-                               href="#"
-                               role="button"
-                               data-bs-toggle="dropdown"
-                               aria-expanded="false">
-
-                                <span class="user-avatar">
-
-                                    @(string.IsNullOrWhiteSpace(User.Identity?.Name)
-                                        ? "?"
-                                        : User.Identity.Name.Substring(0, 1).ToUpper())
-
-                                </span>
-
-                                <span class="username-text">
-
-                                    @User.Identity?.Name
-
-                                </span>
-
-                            </a>
-
-                            <ul class="dropdown-menu dropdown-menu-end user-dropdown">
-
-                                <li>
-
-                                    <div class="dropdown-user-info">
-
-                                        <small>
-                                            Signed in as
-                                        </small>
-
-                                        <strong>
-                                            @User.Identity?.Name
-                                        </strong>
-
-                                    </div>
-
-                                </li>
-
-                                <li>
-                                    <hr class="dropdown-divider" />
-                                </li>
-
-                                <li>
-
-                                    <a class="dropdown-item logout-link"
-                                       asp-controller="Home"
-                                       asp-action="Logout">
-
-                                        <i class="bi bi-box-arrow-right me-2"></i>
-                                        Logout
-
-                                    </a>
-
-                                </li>
-
-                            </ul>
-
-                        </li>
-                    }
-                    else
-                    {
-                        <li class="nav-item">
-
-                            <a class="nav-link app-nav-link"
-                               asp-controller="Home"
-                               asp-action="Index">
-
-                                Home
-
-                            </a>
-
-                        </li>
-
-                        <li class="nav-item">
-
-                            <a class="nav-link app-nav-link"
-                               href="/#features">
-
-                                Features
-
-                            </a>
-
-                        </li>
-
-                        <li class="nav-item">
-
-                            <a class="nav-link app-nav-link"
-                               href="/#about">
-
-                                About
-
-                            </a>
-
-                        </li>
-
-                        <li class="nav-item ms-lg-2">
-
-                            <a class="btn btn-dark px-4"
-                               href="/#login">
-
-                                Login
-
-                            </a>
-
-                        </li>
-                    }
-
-                </ul>
 
             </div>
 
         </div>
+    }
 
-    </nav>
+    @if (TempData["Error"] != null)
+    {
+        <div class="container pt-3">
 
+            <div class="alert alert-danger alert-dismissible fade show">
 
-    <!-- MAIN -->
+                @TempData["Error"]
 
-    <main class="main-content">
-
-        @RenderBody()
-
-    </main>
-
-
-    <!-- FOOTER -->
-
-    <footer class="app-footer">
-
-        <div class="container footer-wrapper">
-
-            <div class="row align-items-start">
-
-                <div class="col-md-7">
-
-                    <div class="footer-brand">
-                        TaskFlow
-                    </div>
-
-                    <p class="footer-description">
-
-                        A modern AI-powered task management platform
-                        designed to help you plan smarter, organize work
-                        and turn goals into actionable tasks.
-
-                    </p>
-
-                </div>
-
-
-                <div class="col-md-5 text-md-end">
-
-                    <div class="footer-tech">
-                        BUILT WITH
-                    </div>
-
-                    <div class="mt-2 text-muted small">
-
-                        ASP.NET Core MVC · PostgreSQL · Identity · Groq AI
-
-                    </div>
-
-                </div>
-
-            </div>
-
-
-            <div class="footer-bottom d-flex flex-wrap justify-content-between gap-2">
-
-                <span>
-                    © 2026 TaskFlow
-                </span>
-
-                <span>
-                    AI-powered productivity.
-                </span>
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="alert">
+                </button>
 
             </div>
 
         </div>
+    }
 
-    </footer>
+    @RenderBody()
 
+</main>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js">
-    </script>
+<footer class="border-top py-4 mt-5">
 
-    <script src="~/js/site.js"
-            asp-append-version="true">
-    </script>
+<div class="container">
 
+<div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
 
-    <script>
+<div class="text-muted small">
 
-            function closeToast(button) {
+© @DateTime.Now.Year TaskFlow
 
-                const toast =
-                    button.closest(".app-toast");
+</div>
 
-                hideToast(toast);
+<div class="text-muted small">
 
-            }
+Built with ASP.NET Core MVC • PostgreSQL • AI
 
+</div>
 
-            function hideToast(toast) {
+</div>
 
-                if (!toast ||
-                    toast.classList.contains("toast-hide")) {
+</div>
 
-                    return;
+</footer>
 
-                }
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
-                toast.classList.add("toast-hide");
+<script src="~/js/site.js"
+        asp-append-version="true"></script>
 
-                setTimeout(() => {
-
-                    toast.remove();
-
-                }, 300);
-
-            }
-
-
-            document.addEventListener(
-                "DOMContentLoaded",
-                function () {
-
-                    document.querySelectorAll(".app-toast")
-                        .forEach(toast => {
-
-                            setTimeout(() => {
-
-                                hideToast(toast);
-
-                            }, 5000);
-
-                        });
-
-                }
-            );
-
-    </script>
-
-
-    @await RenderSectionAsync(
-        "Scripts",
-        required: false
-    )
-
+@await RenderSectionAsync("Scripts", required:false)
 
 </body>
 

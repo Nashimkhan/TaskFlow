@@ -6,404 +6,192 @@
 }
 
 <!DOCTYPE html>
+
 <html lang="en">
 
 <head>
 
     <meta charset="utf-8" />
 
-    <title>Verify Your Email - TaskFlow</title>
-
     <meta name="viewport"
           content="width=device-width, initial-scale=1" />
 
+    <title>Verify Email - TaskFlow</title>
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
-          rel="stylesheet">
+          rel="stylesheet" />
 
     <link rel="stylesheet"
-          href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-
-    <style>
-
-            * {
-                box-sizing: border-box;
-            }
-
-            body {
-                margin: 0;
-                min-height: 100vh;
-                color: #111827;
-                background: radial-gradient(circle at 80% 20%, rgba(79, 70, 229, .10), transparent 35%), radial-gradient(circle at 20% 80%, rgba(124, 58, 237, .07), transparent 35%), #ffffff;
-            }
-
-            .verify-page {
-                width: 100%;
-                min-height: 100vh;
-                padding: 40px 20px;
-                display: flex;
-                justify-content: center;
-                align-items: center;
-            }
-
-            .verify-wrapper {
-                width: 100%;
-                max-width: 500px;
-            }
-
-            .brand {
-                display: block;
-                margin-bottom: 42px;
-                color: #111827;
-                font-size: 24px;
-                font-weight: 800;
-                text-align: center;
-                text-decoration: none;
-                letter-spacing: -1px;
-            }
-
-            .verify-card {
-                padding: 38px;
-                background: #ffffff;
-                border: 1px solid #e5e7eb;
-                border-radius: 18px;
-                box-shadow: 0 20px 60px rgba(0, 0, 0, .06);
-                text-align: center;
-            }
-
-            .email-icon {
-                width: 68px;
-                height: 68px;
-                margin: 0 auto 25px;
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                color: #4f46e5;
-                background: #eef2ff;
-                border-radius: 17px;
-                font-size: 28px;
-            }
-
-            .verify-title {
-                margin-bottom: 10px;
-                color: #111827;
-                font-size: 32px;
-                font-weight: 800;
-                letter-spacing: -1px;
-            }
-
-            .welcome-text {
-                margin-bottom: 28px;
-                color: #6b7280;
-            }
-
-            .email-label {
-                margin-bottom: 10px;
-                color: #6b7280;
-                font-size: 14px;
-            }
-
-            .email-address {
-                padding: 14px 18px;
-                margin-bottom: 22px;
-                color: #4338ca;
-                background: #f5f3ff;
-                border: 1px solid #ddd6fe;
-                border-radius: 10px;
-                font-size: 14px;
-                font-weight: 600;
-                word-break: break-word;
-            }
-
-            .instruction-text {
-                margin-bottom: 25px;
-                color: #6b7280;
-                font-size: 14px;
-                line-height: 1.7;
-            }
-
-            .account-warning {
-                padding: 14px 16px;
-                margin-bottom: 25px;
-                color: #92400e;
-                background: #fffbeb;
-                border: 1px solid #fde68a;
-                border-radius: 10px;
-                font-size: 13px;
-                text-align: left;
-            }
-
-            .waiting-section {
-                padding: 20px;
-                background: #f9fafb;
-                border-radius: 12px;
-            }
-
-            .waiting-spinner {
-                width: 22px;
-                height: 22px;
-                color: #4f46e5;
-            }
-
-            .waiting-text {
-                margin: 10px 0 0;
-                color: #6b7280;
-                font-size: 13px;
-            }
-
-            .success-box {
-                padding: 16px;
-                color: #047857;
-                background: #ecfdf5;
-                border: 1px solid #a7f3d0;
-                border-radius: 10px;
-                font-size: 14px;
-                font-weight: 600;
-            }
-
-            .help-text {
-                margin: 24px 0 0;
-                color: #9ca3af;
-                font-size: 12px;
-                line-height: 1.6;
-            }
-
-            .security-text {
-                margin-top: 25px;
-                color: #9ca3af;
-                font-size: 12px;
-                text-align: center;
-            }
-
-            @@media(max-width: 576px) {
-
-                .verify-page {
-                    padding: 30px 15px;
-                }
-
-                .brand {
-                    margin-bottom: 32px;
-                }
-
-                .verify-card {
-                    padding: 27px 22px;
-                }
-
-                .verify-title {
-                    font-size: 28px;
-                }
-            }
-
-    </style>
+          href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
 
 </head>
 
-<body>
+<body class="bg-light">
 
-    <main class="verify-page">
+    <div class="page d-flex align-items-center justify-content-center min-vh-100">
 
-        <div class="verify-wrapper">
+        <div class="container"
+             style="max-width:520px;">
 
-            <a asp-controller="Home"
-               asp-action="Index"
-               class="brand">
+            <div class="text-center mb-5">
 
-                TaskFlow
+                <a asp-action="Index"
+                   class="text-decoration-none">
 
-            </a>
+                    <h2 class="fw-bold text-dark">
 
+                        TaskFlow
 
-            <div class="verify-card">
+                    </h2>
 
-                <div class="email-icon">
+                </a>
+
+                <div class="member-avatar mx-auto mb-4"
+                     style="width:75px;height:75px;font-size:30px;">
 
                     <i class="bi bi-envelope-check"></i>
 
                 </div>
 
+                <h1 class="page-title">
 
-                <h1 class="verify-title">
-
-                    Check your inbox.
+                    Verify Your Email
 
                 </h1>
 
+                <p class="page-subtitle">
 
-                <p class="welcome-text">
-
-                    You're almost there@(string.IsNullOrWhiteSpace(username) ? "" : $", {username}")!
-
-                </p>
-
-
-                <p class="email-label">
-
-                    We sent a verification link to
+                    @(string.IsNullOrWhiteSpace(username)
+                    ? "Almost there!"
+                    : $"Almost there, {username}!")
 
                 </p>
 
+            </div>
 
-                <div class="email-address">
+            <div class="card">
 
-                    @email
+                <div class="card-body text-center">
 
-                </div>
+                    <p class="text-muted">
 
-
-                <p class="instruction-text">
-
-                    Open the email and click the verification link
-                    to activate your TaskFlow account.
-
-                </p>
-
-
-                <div class="account-warning">
-
-                    <i class="bi bi-lock me-2"></i>
-
-                    <strong>Account not active yet.</strong>
-
-                    Verify your email before signing in.
-
-                </div>
-
-
-                <div id="waitingSection"
-                     class="waiting-section">
-
-                    <div class="spinner-border waiting-spinner"
-                         role="status">
-
-                        <span class="visually-hidden">
-                            Checking verification
-                        </span>
-
-                    </div>
-
-                    <p class="waiting-text">
-
-                        Waiting for email verification...
+                        We've sent a verification link to
 
                     </p>
 
+                    <div class="alert alert-primary fw-semibold">
+
+                        @email
+
+                    </div>
+
+                    <p class="text-muted mb-4">
+
+                        Click the link in your inbox to activate your TaskFlow account.
+
+                    </p>
+
+                    <div class="alert alert-warning">
+
+                        <i class="bi bi-lock me-2"></i>
+
+                        Your account cannot be used until your email is verified.
+
+                    </div>
+
+                    <div id="waitingSection">
+
+                        <div class="spinner-border text-primary mb-3"></div>
+
+                        <p class="text-muted">
+
+                            Waiting for email verification...
+
+                        </p>
+
+                    </div>
+
+                    <div class="small text-muted mt-4">
+
+                        <i class="bi bi-info-circle me-1"></i>
+
+                        Can't find the email? Check your Spam or Junk folder.
+
+                    </div>
+
                 </div>
-
-
-                <p class="help-text">
-
-                    <i class="bi bi-info-circle me-1"></i>
-
-                    Can't find the email?
-                    Check your spam or junk folder.
-
-                </p>
 
             </div>
 
-
-            <div class="security-text">
+            <p class="text-center text-muted small mt-4">
 
                 <i class="bi bi-shield-check me-1"></i>
 
-                Secure account verification powered by TaskFlow
+                Secure email verification powered by TaskFlow
 
-            </div>
+            </p>
 
         </div>
 
-    </main>
-
+    </div>
 
     <script>
 
-            const email = @Html.Raw(
-                            System.Text.Json.JsonSerializer.Serialize(email)
-                    );
+            const email=@Html.Raw(
+                    System.Text.Json.JsonSerializer.Serialize(email));
 
-            let verificationInterval;
+            let interval;
 
+            async function checkVerification(){
 
-            const checkVerification = async () => {
+            if(!email)return;
 
-                if (!email) {
-                    return;
-                }
+            try{
 
-                try {
+            const response=await fetch(
 
-                    const response = await fetch(
-                        `/Home/CheckEmailVerification?email=${encodeURIComponent(email)}`,
-                        {
-                            cache: "no-store"
-                        }
-                    );
+            `/Home/CheckEmailVerification?email=${encodeURIComponent(email)}`,
 
-                    if (!response.ok) {
-                        return;
-                    }
+            {cache:"no-store"}
 
-                    const data =
-                        await response.json();
+            );
 
+            if(!response.ok)return;
 
-                    if (data.verified === true) {
+            const data=await response.json();
 
-                        clearInterval(
-                            verificationInterval
-                        );
+            if(data.verified){
 
+            clearInterval(interval);
 
-                        document.getElementById(
-                            "waitingSection"
-                        ).innerHTML = `
+            document.getElementById("waitingSection").innerHTML=`
 
-                            <div class="success-box">
+            <div class="alert alert-success mb-0">
 
-                                <i class="bi bi-check-circle-fill me-2"></i>
+            <i class="bi bi-check-circle-fill me-2"></i>
 
-                                Email verified successfully!
+            Email verified successfully.<br>
 
-                                <div class="mt-1 fw-normal">
+            Redirecting to login...
 
-                                    Redirecting you to login...
+            </div>`;
 
-                                </div>
+            setTimeout(()=>{
 
-                            </div>
+            window.location.href="/#login";
 
-                        `;
+            },1500);
 
+            }
 
-                        setTimeout(() => {
+            }
+            catch{}
 
-                            window.location.href = "/#login";
-
-                        }, 1500);
-
-                    }
-
-                }
-                catch (error) {
-
-                    console.log(
-                        "Waiting for email verification..."
-                    );
-
-                }
-
-            };
-
+            }
 
             checkVerification();
 
-
-            verificationInterval = setInterval(
-
-                checkVerification,
-
-                2000
-
-            );
+            interval=setInterval(checkVerification,2000);
 
     </script>
 

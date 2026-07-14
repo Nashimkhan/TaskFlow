@@ -18,6 +18,12 @@ namespace TaskFlow.Models
 
         public string UserId { get; set; } = string.Empty;
 
+        public int? ProjectId { get; set; }
+
+        public Project? Project { get; set; }
+
+        public string? AssignedUserId { get; set; }
+
         public IdentityUser? User { get; set; }
 
         public DateTime CreatedAt { get; set; }

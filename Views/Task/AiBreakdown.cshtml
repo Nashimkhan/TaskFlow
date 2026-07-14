@@ -2,12 +2,15 @@
 
 @{
     ViewData["Title"] = "AI Assistant";
+
+    int? projectId = ViewBag.ProjectId as int?;
+    string? projectName = ViewBag.ProjectName as string;
 }
 
 <style>
     .ai-page {
         max-width: 1100px;
-        width: calc(100% - 40px);
+        width: min(100% - 32px, 1100px);
         margin: 0 auto;
         padding: 55px 0 80px;
     }
@@ -16,7 +19,7 @@
         color: #111827;
         font-size: 42px;
         font-weight: 800;
-        letter-spacing: -1.8px;
+        letter-spacing: 0;
     }
 
     .ai-header p {
@@ -41,7 +44,7 @@
         padding: 30px;
         background: #ffffff;
         border: 1px solid #e5e7eb;
-        border-radius: 16px;
+        border-radius: 8px;
         box-shadow: 0 15px 45px rgba(0, 0, 0, .04);
     }
 
@@ -55,7 +58,7 @@
         min-height: 150px;
         padding: 18px;
         border: 1px solid #e5e7eb;
-        border-radius: 12px;
+        border-radius: 8px;
         resize: vertical;
         font-size: 16px;
         line-height: 1.6;
@@ -77,7 +80,7 @@
         color: #ffffff;
         background: #111827;
         border: none;
-        border-radius: 10px;
+        border-radius: 8px;
         font-weight: 600;
         transition: .25s;
     }
@@ -102,7 +105,7 @@
         .suggestions-header h3 {
             color: #111827;
             font-weight: 800;
-            letter-spacing: -.7px;
+            letter-spacing: 0;
         }
 
         .suggestions-header p {
@@ -116,7 +119,7 @@
         margin-bottom: 15px;
         background: #ffffff;
         border: 1px solid #e5e7eb;
-        border-radius: 14px;
+        border-radius: 8px;
         cursor: pointer;
         transition: .25s;
     }
@@ -191,7 +194,7 @@
         padding: 16px;
         background: rgba(255, 255, 255, .92);
         border: 1px solid #e5e7eb;
-        border-radius: 14px;
+        border-radius: 8px;
         backdrop-filter: blur(15px);
         box-shadow: 0 15px 45px rgba(0, 0, 0, .1);
     }
@@ -201,7 +204,7 @@
         color: #ffffff;
         background: #111827;
         border: none;
-        border-radius: 10px;
+        border-radius: 8px;
         font-weight: 600;
     }
 
@@ -216,7 +219,7 @@
         color: #b91c1c;
         background: #fef2f2;
         border: 1px solid #fecaca;
-        border-radius: 12px;
+        border-radius: 8px;
     }
 
     .thinking-box {
@@ -225,7 +228,7 @@
         padding: 18px;
         color: #4f46e5;
         background: #eef2ff;
-        border-radius: 12px;
+        border-radius: 8px;
     }
 
     .thinking-dots span {
@@ -260,7 +263,7 @@
 
     @@media(max-width: 767px) {
         .ai-page {
-            width: calc(100% - 24px);
+            width: min(100% - 24px, 1100px);
             padding-top: 35px;
         }
 
@@ -301,13 +304,28 @@
 
         </div>
 
-        <a asp-action="Index"
-           class="btn btn-outline-dark">
+        @if (projectId.HasValue)
+        {
+            <a asp-controller="Project"
+               asp-action="Details"
+               asp-route-id="@projectId.Value"
+               class="btn btn-outline-dark">
 
-            <i class="bi bi-arrow-left me-2"></i>
-            Dashboard
+                <i class="bi bi-arrow-left me-2"></i>
+                Project
 
-        </a>
+            </a>
+        }
+        else
+        {
+            <a asp-action="Index"
+               class="btn btn-outline-dark">
+
+                <i class="bi bi-arrow-left me-2"></i>
+                Dashboard
+
+            </a>
+        }
 
     </div>
 
@@ -321,6 +339,10 @@
               id="aiForm">
 
             @Html.AntiForgeryToken()
+
+            <input type="hidden"
+                   name="projectId"
+                   value="@projectId" />
 
             <label class="goal-label mb-2">
                 What do you want to achieve?
@@ -412,6 +434,10 @@
 
             @Html.AntiForgeryToken()
 
+            <input type="hidden"
+                   name="projectId"
+                   value="@projectId" />
+
             <div class="suggestions-header">
 
                 <div class="d-flex flex-wrap justify-content-between align-items-end gap-3">
@@ -423,7 +449,7 @@
                         </h3>
 
                         <p>
-                            Select the tasks you want to add to your dashboard.
+                            Select the tasks you want to add to @(projectName ?? "your dashboard").
                         </p>
 
                     </div>
@@ -523,6 +549,10 @@
                            name="tasks[@i].Priority"
                            value="@Model[i].Priority" />
 
+                    <input type="hidden"
+                           name="tasks[@i].SuggestedDueDate"
+                           value="@Model[i].SuggestedDueDate.ToString("yyyy-MM-dd")" />
+
                 </div>
             }
 
@@ -540,7 +570,7 @@
                         </strong>
 
                         <div class="text-muted small">
-                            Selected tasks will be added to your dashboard.
+                            Selected tasks will be added to @(projectName ?? "your dashboard").
                         </div>
 
                     </div>

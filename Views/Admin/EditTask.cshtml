@@ -5,474 +5,194 @@
 }
 
 <link href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css"
-      rel="stylesheet">
+      rel="stylesheet" />
 
-<style>
+<div class="page">
 
+    <div class="container" style="max-width:760px;">
 
-    .admin-error-message {
-        display: flex;
-        align-items: flex-start;
-        gap: 12px;
-        padding: 15px 18px;
-        margin-bottom: 25px;
-        color: #991b1b;
-        background: #fef2f2;
-        border: 1px solid #fecaca;
-        border-radius: 12px;
-        font-size: 14px;
-    }
+        <div class="page-header">
 
-    .admin-error-icon {
-        width: 34px;
-        height: 34px;
-        flex-shrink: 0;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: #dc2626;
-        background: #fee2e2;
-        border-radius: 8px;
-    }
+            <a asp-action="UserTasks"
+               asp-route-id="@ViewBag.UserId"
+               class="btn btn-light mb-3">
 
-    .admin-error-message strong {
-        display: block;
-        margin-bottom: 3px;
-        color: #7f1d1d;
-    }
+                <i class="bi bi-arrow-left me-2"></i>
 
-    .admin-edit-page {
-        max-width: 760px;
-        width: calc(100% - 40px);
-        margin: 0 auto;
-        padding: 55px 0 80px;
-    }
+                Back
 
-    .admin-edit-header h1 {
-        color: #111827;
-        font-size: 40px;
-        font-weight: 800;
-        letter-spacing: -1.5px;
-    }
+            </a>
 
-    .admin-edit-header p {
-        color: #6b7280;
-        font-size: 16px;
-    }
+            <span class="badge bg-primary mb-3">
 
-    .admin-label {
-        display: inline-flex;
-        align-items: center;
-        gap: 7px;
-        padding: 7px 12px;
-        margin-bottom: 18px;
-        color: #7c3aed;
-        background: #f5f3ff;
-        border-radius: 100px;
-        font-size: 12px;
-        font-weight: 700;
-    }
+                <i class="bi bi-shield-lock me-2"></i>
 
-    .task-id {
-        display: inline-flex;
-        align-items: center;
-        padding: 6px 10px;
-        color: #6b7280;
-        background: #f3f4f6;
-        border-radius: 100px;
-        font-size: 12px;
-        font-weight: 600;
-    }
-
-    .admin-edit-card {
-        padding: 32px;
-        background: #ffffff;
-        border: 1px solid #e5e7eb;
-        border-radius: 16px;
-        box-shadow: 0 15px 45px rgba(0, 0, 0, .04);
-    }
-
-    .field-label {
-        margin-bottom: 8px;
-        color: #111827;
-        font-size: 14px;
-        font-weight: 600;
-    }
-
-    .task-input {
-        min-height: 48px;
-        border: 1px solid #e5e7eb;
-        border-radius: 10px;
-    }
-
-    textarea.task-input {
-        min-height: 130px;
-        resize: vertical;
-    }
-
-    .task-input:focus {
-        border-color: #7c3aed;
-        box-shadow: 0 0 0 4px rgba(124, 58, 237, .1);
-    }
-
-    .field-help {
-        margin-top: 7px;
-        color: #9ca3af;
-        font-size: 12px;
-    }
-
-    .form-divider {
-        margin: 30px 0;
-        border-color: #f3f4f6;
-        opacity: 1;
-    }
-
-    .cancel-btn,
-    .save-btn {
-        min-height: 48px;
-        padding: 11px 22px;
-        border-radius: 9px;
-        font-weight: 600;
-    }
-
-    .save-btn {
-        color: #ffffff;
-        background: #111827;
-        border: none;
-    }
-
-        .save-btn:hover {
-            color: #ffffff;
-            background: #7c3aed;
-        }
-
-    .admin-warning {
-        padding: 15px 18px;
-        margin-bottom: 25px;
-        color: #92400e;
-        background: #fffbeb;
-        border: 1px solid #fde68a;
-        border-radius: 10px;
-        font-size: 14px;
-    }
-
-
-    @@media(max-width: 767px) {
-        .admin-edit-page {
-            width: calc(100% - 24px);
-            padding-top: 35px;
-        }
-
-        .admin-edit-header h1 {
-            font-size: 32px;
-        }
-
-        .admin-edit-card {
-            padding: 22px;
-        }
-
-        .form-actions {
-            flex-direction: column-reverse;
-        }
-
-            .form-actions .btn {
-                width: 100%;
-            }
-    }
-</style>
-
-<div class="admin-edit-page">
-
-    <!-- HEADER -->
-
-    <div class="admin-edit-header mb-5">
-
-        <a asp-controller="Admin"
-           asp-action="UserTasks"
-           asp-route-id="@Model.UserId"
-           class="text-decoration-none text-muted small">
-
-            <i class="bi bi-arrow-left me-2"></i>
-
-            Back to user tasks
-
-        </a>
-
-        <div class="mt-4">
-
-            <div class="admin-label">
-
-                <i class="bi bi-shield-lock"></i>
-
-                ADMIN TASK MANAGEMENT
-
-            </div>
-
-        </div>
-
-        <div class="mb-3">
-
-            <span class="task-id">
-
-                TASK #@Model.Id
+                ADMIN
 
             </span>
 
-        </div>
+            <h1 class="page-title">
 
-        <h1>
-            Edit user task.
-        </h1>
+                Edit User Task
 
-        <p class="mb-0">
-            Update this user's task details, status, priority or due date.
-        </p>
+            </h1>
 
-    </div>
+            <p class="page-subtitle">
 
+                Update task information as an administrator.
 
-    <!-- ERROR -->
-    @if (ViewBag.Error != null)
-    {
-        <div class="admin-error-message">
-
-            <div class="admin-error-icon">
-                <i class="bi bi-exclamation-circle"></i>
-            </div>
-
-            <div>
-                <strong>Unable to save changes</strong>
-
-                <p class="mb-0">
-                    @ViewBag.Error
-                </p>
-            </div>
+            </p>
 
         </div>
-    }
 
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger">
 
-    <!-- ADMIN WARNING -->
-
-    <div class="admin-warning">
-
-        <i class="bi bi-shield-exclamation me-2"></i>
-
-        <strong>Admin action:</strong>
-
-        Changes made here directly update this user's task.
-
-    </div>
-
-
-    <!-- FORM -->
-
-    <div class="admin-edit-card">
-
-        <form asp-controller="Admin"
-              asp-action="EditTask"
-              method="post">
-
-            @Html.AntiForgeryToken()
-
-            <input type="hidden"
-                   asp-for="Id" />
-
-            <input type="hidden"
-                   asp-for="UserId" />
-
-            <div asp-validation-summary="ModelOnly"
-                 class="text-danger mb-3">
-            </div>
-
-
-            <!-- TITLE -->
-
-            <div class="mb-4">
-
-                <label asp-for="Title"
-                       class="field-label">
-
-                    Task title
-
-                </label>
-
-                <input asp-for="Title"
-                       class="form-control task-input"
-                       required />
-
-                <span asp-validation-for="Title"
-                      class="text-danger small"></span>
-
-                <div class="field-help">
-                    Update the task title if necessary.
-                </div>
+                @TempData["Error"]
 
             </div>
+        }
 
+        <div class="card">
 
-            <!-- DESCRIPTION -->
+            <div class="card-body">
 
-            <div class="mb-4">
+                <form asp-action="EditTask"
+                      method="post">
 
-                <label asp-for="Description"
-                       class="field-label">
+                    @Html.AntiForgeryToken()
 
-                    Description
+                    <input asp-for="Id" type="hidden" />
+                    <input asp-for="UserId" type="hidden" />
 
-                </label>
+                    <div asp-validation-summary="ModelOnly"
+                         class="text-danger mb-3"></div>
 
-                <textarea asp-for="Description"
-                          class="form-control task-input"
-                          placeholder="Add task details..."></textarea>
+                    <div class="mb-4">
 
-                <span asp-validation-for="Description"
-                      class="text-danger small"></span>
+                        <label asp-for="Title"
+                               class="form-label">
 
-                <div class="field-help">
-                    Add context or instructions for this task.
-                </div>
+                            Title
 
-            </div>
+                        </label>
 
-            <hr class="form-divider" />
+                        <input asp-for="Title"
+                               class="form-control" />
 
+                        <span asp-validation-for="Title"
+                              class="text-danger"></span>
 
-            <!-- STATUS + PRIORITY -->
+                    </div>
 
-            <div class="row g-4">
+                    <div class="mb-4">
 
-                <div class="col-md-6">
+                        <label asp-for="Description"
+                               class="form-label">
 
-                    <label asp-for="Status"
-                           class="field-label">
+                            Description
 
-                        Status
+                        </label>
 
-                    </label>
+                        <textarea asp-for="Description"
+                                  class="form-control"></textarea>
 
-                    <select asp-for="Status"
-                            class="form-select task-input">
+                        <span asp-validation-for="Description"
+                              class="text-danger"></span>
 
-                        <option value="Pending">
-                            Pending
-                        </option>
+                    </div>
 
-                        <option value="Done">
-                            Done
-                        </option>
+                    <div class="row">
 
-                    </select>
+                        <div class="col-md-6 mb-4">
 
-                    <span asp-validation-for="Status"
-                          class="text-danger small"></span>
+                            <label asp-for="Status"
+                                   class="form-label">
 
-                </div>
+                                Status
 
+                            </label>
 
-                <div class="col-md-6">
+                            <select asp-for="Status"
+                                    class="form-select">
 
-                    <label asp-for="Priority"
-                           class="field-label">
+                                <option value="Pending">Pending</option>
+                                <option value="Done">Done</option>
 
-                        Priority
+                            </select>
 
-                    </label>
+                        </div>
 
-                    <select asp-for="Priority"
-                            class="form-select task-input">
+                        <div class="col-md-6 mb-4">
 
-                        <option value="Low">
-                            Low priority
-                        </option>
+                            <label asp-for="Priority"
+                                   class="form-label">
 
-                        <option value="Medium">
-                            Medium priority
-                        </option>
+                                Priority
 
-                        <option value="High">
-                            High priority
-                        </option>
+                            </label>
 
-                    </select>
+                            <select asp-for="Priority"
+                                    class="form-select">
 
-                    <span asp-validation-for="Priority"
-                          class="text-danger small"></span>
+                                <option value="Low">Low</option>
+                                <option value="Medium">Medium</option>
+                                <option value="High">High</option>
 
-                </div>
+                            </select>
+
+                        </div>
+
+                    </div>
+
+                    <div class="mb-4">
+
+                        <label asp-for="DueDate"
+                               class="form-label">
+
+                            Due Date
+
+                        </label>
+
+                        <input asp-for="DueDate"
+                               id="datePicker"
+                               class="form-control" />
+
+                        <span asp-validation-for="DueDate"
+                              class="text-danger"></span>
+
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2">
+
+                        <a asp-action="UserTasks"
+                           asp-route-id="@ViewBag.UserId"
+                           class="btn btn-light">
+
+                            Cancel
+
+                        </a>
+
+                        <button class="btn btn-primary">
+
+                            <i class="bi bi-check2 me-2"></i>
+
+                            Save Changes
+
+                        </button>
+
+                    </div>
+
+                </form>
 
             </div>
 
-
-            <!-- DUE DATE -->
-
-            <div class="mt-4">
-
-                <label asp-for="DueDate"
-                       class="field-label">
-
-                    Due date
-
-                </label>
-
-                <div class="input-group">
-
-                    <span class="input-group-text bg-white border-end-0">
-
-                        <i class="bi bi-calendar3 text-muted"></i>
-
-                    </span>
-
-                    <input asp-for="DueDate"
-                           id="datePicker"
-                           class="form-control task-input border-start-0"
-                           autocomplete="off"
-                           required />
-
-                </div>
-
-                <span asp-validation-for="DueDate"
-                      class="text-danger small"></span>
-
-                <div class="field-help">
-                    Change when this task should be completed.
-                </div>
-
-            </div>
-
-            <hr class="form-divider" />
-
-
-            <!-- ACTIONS -->
-
-            <div class="d-flex justify-content-end gap-3 form-actions">
-
-                <a asp-controller="Admin"
-                   asp-action="UserTasks"
-                   asp-route-id="@Model.UserId"
-                   class="btn btn-outline-secondary cancel-btn">
-
-                    Cancel
-
-                </a>
-
-                <button type="submit"
-                        class="btn save-btn">
-
-                    <i class="bi bi-check2 me-2"></i>
-
-                    Save changes
-
-                </button>
-
-            </div>
-
-        </form>
+        </div>
 
     </div>
 
 </div>
-
 
 @section Scripts {
 
@@ -482,17 +202,15 @@
 
     <script>
 
-        flatpickr("#datePicker", {
+        flatpickr("#datePicker",{
 
-        dateFormat: "Y-m-d",
+        dateFormat:"Y-m-d",
 
-        defaultDate: "@Model.DueDate.ToString("yyyy-MM-dd")",
+        defaultDate:"@Model.DueDate.ToString("yyyy-MM-dd")",
 
-        disableMobile: true
+        disableMobile:true
 
         });
-
-
 
     </script>
 

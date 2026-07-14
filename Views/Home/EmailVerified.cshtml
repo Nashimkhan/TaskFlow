@@ -3,71 +3,89 @@
 }
 
 <!DOCTYPE html>
-<html>
+
+<html lang="en">
+
 <head>
 
-    <title>Email Verified - TaskFlow</title>
+    <meta charset="utf-8" />
 
     <meta name="viewport"
           content="width=device-width, initial-scale=1" />
 
+    <title>Email Verified - TaskFlow</title>
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
-          rel="stylesheet">
+          rel="stylesheet" />
 
-    <style>
-
-            body {
-                background: linear-gradient(135deg, #667eea, #764ba2);
-                min-height: 100vh;
-            }
-
-            .success-card {
-                width: 430px;
-                border: none;
-                border-radius: 18px;
-            }
-
-            .success-icon {
-                width: 80px;
-                height: 80px;
-                border-radius: 50%;
-                background: #d1e7dd;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                font-size: 40px;
-                margin: auto;
-            }
-
-    </style>
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
 
 </head>
 
-<body>
+<body class="bg-light">
 
-    <div class="container min-vh-100 d-flex justify-content-center align-items-center">
+    <div class="page d-flex align-items-center justify-content-center min-vh-100">
 
-        <div class="card shadow-lg p-4 success-card bg-white text-center">
+        <div class="container"
+             style="max-width:460px;">
 
-            <div class="success-icon mb-3">
-                ✓
+            <div class="card shadow-sm">
+
+                <div class="card-body text-center p-5">
+
+                    <div class="member-avatar mx-auto mb-4"
+                         style="width:80px;height:80px;font-size:34px;background:#dcfce7;color:#16a34a;">
+
+                        <i class="bi bi-check-circle-fill"></i>
+
+                    </div>
+
+                    <h1 class="page-title text-success">
+
+                        Email Verified
+
+                    </h1>
+
+                    <p class="page-subtitle">
+
+                        Your TaskFlow account has been activated successfully.
+
+                    </p>
+
+                    <div class="alert alert-success">
+
+                        🎉 Welcome to TaskFlow!
+
+                    </div>
+
+                    <p class="text-muted">
+
+                        You can now close this tab.
+
+                        Your login page will automatically redirect you.
+
+                    </p>
+
+                    <a href="/#login"
+                       class="btn btn-primary mt-3">
+
+                        <i class="bi bi-box-arrow-in-right me-2"></i>
+
+                        Go to Login
+
+                    </a>
+
+                </div>
+
             </div>
 
-            <h3 class="fw-bold text-success">
-                Email Verified!
-            </h3>
+            <p class="text-center text-muted small mt-4">
 
-            <p class="text-muted mt-3">
-                Your TaskFlow account has been activated successfully.
-            </p>
+                <i class="bi bi-shield-check me-1"></i>
 
-            <div class="alert alert-success small">
-                🎉 You're officially in!
-            </div>
+                Secure verification completed successfully.
 
-            <p class="text-muted small mb-0">
-                You can close this tab.
-                Your registration page will redirect you to login automatically.
             </p>
 
         </div>
@@ -75,4 +93,5 @@
     </div>
 
 </body>
+
 </html>
