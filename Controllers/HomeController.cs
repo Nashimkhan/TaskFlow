@@ -94,15 +94,6 @@ namespace TaskFlow.Controllers
                     email);
             }
 
-            if (!email.EndsWith(
-                    "@gmail.com",
-                    StringComparison.OrdinalIgnoreCase))
-            {
-                return RegisterError(
-                    "Only Gmail addresses are allowed. Please use an @gmail.com email.",
-                    username,
-                    email);
-            }
 
             if (password.Length < 6)
             {
