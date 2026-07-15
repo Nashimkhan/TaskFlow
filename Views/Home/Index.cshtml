@@ -931,6 +931,21 @@
 
         }
 
+                const section = '@ViewBag.Section';
+
+        if (section === 'login') {
+            showLogin();
+
+            setTimeout(() => {
+                document
+                    .getElementById('login')
+                    ?.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+            }, 100);
+        }
+
     </script>
 
 }

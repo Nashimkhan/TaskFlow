@@ -1,4 +1,5 @@
 using System.Security.Cryptography;
+using Microsoft.AspNetCore.WebUtilities;
 using System.Text;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -34,17 +35,14 @@ namespace TaskFlow.Controllers
             _passwordHasher = passwordHasher;
         }
 
-        public IActionResult Index()
+        public IActionResult Index(string? section)
         {
             if (User.Identity?.IsAuthenticated == true)
             {
-                if (User.IsInRole("Admin"))
-                {
-                    return RedirectToAction("Index", "Admin");
-                }
-
                 return RedirectToAction("Index", "Task");
             }
+
+            ViewBag.Section = section;
 
             return View();
         }
@@ -276,129 +274,133 @@ namespace TaskFlow.Controllers
         }
 
         [HttpGet]
+        [HttpGet]
         public async Task<IActionResult> ConfirmEmail(
-            int id,
-            string? token)
+    int? id,
+    string? token)
         {
-            if (string.IsNullOrWhiteSpace(token))
+            if (!id.HasValue ||
+                string.IsNullOrWhiteSpace(token))
             {
                 TempData["Error"] =
-                    "Invalid verification link";
+                    "Invalid verification link.";
 
-                return RedirectToAction("Index");
+                return RedirectToAction(
+                    "Index",
+                    new { section = "login" });
             }
 
-            var pending =
+            var pendingRegistration =
                 await _context.PendingRegistrations
-                    .FirstOrDefaultAsync(p => p.Id == id);
+                    .FirstOrDefaultAsync(p => p.Id == id.Value);
 
-            if (pending == null)
+            if (pendingRegistration == null)
             {
                 TempData["Error"] =
                     "Verification link is invalid or has already been used.";
 
-                return RedirectToAction("Index");
+                return RedirectToAction(
+                    "Index",
+                    new { section = "login" });
             }
 
-            if (pending.TokenExpiresAt < DateTime.UtcNow)
+            if (pendingRegistration.TokenExpiresAt <
+                DateTime.UtcNow)
             {
-                _context.PendingRegistrations.Remove(pending);
+                _context.PendingRegistrations.Remove(
+                    pendingRegistration);
 
                 await _context.SaveChangesAsync();
 
                 TempData["Error"] =
                     "Verification link has expired. Please register again.";
 
-                return RedirectToAction("Index");
+                return RedirectToAction(
+                    "Index",
+                    new { section = "register" });
             }
 
-            var receivedTokenHash = HashToken(token);
+            var tokenHash = HashToken(token);
 
-            if (!CryptographicOperations.FixedTimeEquals(
-                    Convert.FromHexString(
-                        pending.VerificationTokenHash),
-                    Convert.FromHexString(
-                        receivedTokenHash)))
+            if (!string.Equals(
+                    pendingRegistration.VerificationTokenHash,
+                    tokenHash,
+                    StringComparison.Ordinal))
             {
                 TempData["Error"] =
-                    "Invalid verification link";
+                    "Invalid verification link.";
 
-                return RedirectToAction("Index");
+                return RedirectToAction(
+                    "Index",
+                    new { section = "login" });
             }
 
             var existingUsername =
                 await _userManager.FindByNameAsync(
-                    pending.Username);
+                    pendingRegistration.Username);
 
             var existingEmail =
                 await _userManager.FindByEmailAsync(
-                    pending.Email);
+                    pendingRegistration.Email);
 
             if (existingUsername != null ||
                 existingEmail != null)
             {
-                _context.PendingRegistrations.Remove(pending);
+                _context.PendingRegistrations.Remove(
+                    pendingRegistration);
 
                 await _context.SaveChangesAsync();
 
                 TempData["Error"] =
                     "This account is already registered.";
 
-                return RedirectToAction("Index");
+                return RedirectToAction(
+                    "Index",
+                    new { section = "login" });
             }
 
             var user = new IdentityUser
             {
-                UserName = pending.Username,
-                Email = pending.Email,
+                UserName = pendingRegistration.Username,
+                Email = pendingRegistration.Email,
                 EmailConfirmed = true,
-                PasswordHash = pending.PasswordHash
+                PasswordHash = pendingRegistration.PasswordHash
             };
 
-            var result =
+            var createResult =
                 await _userManager.CreateAsync(user);
 
-            if (!result.Succeeded)
+            if (!createResult.Succeeded)
             {
-                TempData["Error"] = string.Join(
-                    ", ",
-                    result.Errors.Select(
-                        e => e.Description));
-
-                return RedirectToAction("Index");
-            }
-
-            var roleResult =
-                await _userManager.AddToRoleAsync(
-                    user,
-                    "User");
-
-            if (!roleResult.Succeeded)
-            {
-                await _userManager.DeleteAsync(user);
-
                 TempData["Error"] =
-                    "Account activation failed. Please try again.";
+                    string.Join(
+                        ", ",
+                        createResult.Errors.Select(
+                            e => e.Description));
 
-                return RedirectToAction("Index");
+                return RedirectToAction(
+                    "Index",
+                    new { section = "login" });
             }
 
-            _context.PendingRegistrations.Remove(pending);
+            _context.PendingRegistrations.Remove(
+                pendingRegistration);
 
             await _context.SaveChangesAsync();
 
             TempData["Success"] =
-                "Email verified successfully! Your TaskFlow account is now active. You can login.";
+                "Email verified successfully! Please login.";
 
             return RedirectToAction(
-              "EmailVerified");
-             }
+                "Index",
+                new { section = "login" });
+        }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Login(
-            string? username,
-            string? password)
+    string? username,
+    string? password)
         {
             username = username?.Trim();
 
@@ -406,7 +408,9 @@ namespace TaskFlow.Controllers
                 string.IsNullOrWhiteSpace(password))
             {
                 ViewBag.Error =
-                    "Please enter username and password";
+                    "Username and password are required.";
+
+                ViewBag.Section = "login";
 
                 return View("Index");
             }
@@ -417,7 +421,19 @@ namespace TaskFlow.Controllers
             if (user == null)
             {
                 ViewBag.Error =
-                    "Invalid username or password";
+                    "Invalid username or password.";
+
+                ViewBag.Section = "login";
+
+                return View("Index");
+            }
+
+            if (!user.EmailConfirmed)
+            {
+                ViewBag.Error =
+                    "Please verify your email before logging in.";
+
+                ViewBag.Section = "login";
 
                 return View("Index");
             }
@@ -432,20 +448,16 @@ namespace TaskFlow.Controllers
             if (!result.Succeeded)
             {
                 ViewBag.Error =
-                    "Invalid username or password";
+                    "Invalid username or password.";
+
+                ViewBag.Section = "login";
 
                 return View("Index");
             }
 
-            var isAdmin =
-                await _userManager.IsInRoleAsync(
-                    user,
-                    "Admin");
-
-            TempData["Success"] =
-                "Welcome back, " + username + "!";
-
-            if (isAdmin)
+            if (await _userManager.IsInRoleAsync(
+                user,
+                "Admin"))
             {
                 return RedirectToAction(
                     "Index",
