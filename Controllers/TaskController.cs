@@ -98,8 +98,11 @@ namespace TaskFlow.Controllers
             if (projectId.HasValue)
             {
                 var userId = GetUserId();
+
                 var ownsProject = await _context.Projects
-                    .AnyAsync(p => p.Id == projectId.Value && p.OwnerId == userId);
+                    .AnyAsync(p =>
+                        p.Id == projectId.Value &&
+                        p.OwnerId == userId);
 
                 if (!ownsProject)
                 {
@@ -111,13 +114,17 @@ namespace TaskFlow.Controllers
 
             return View(new TaskItem
             {
-                ProjectId = projectId
+                ProjectId = projectId,
+
+                DueDate = DateTime.UtcNow
+                    .Date
+                    .AddDays(1)
             });
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Create(TaskItem task)
+        public async Task<IActionResult> Create(TaskItem task)
         {
             if (!ModelState.IsValid)
             {
@@ -128,20 +135,37 @@ namespace TaskFlow.Controllers
 
             var userId = GetUserId();
 
+            task.Title =
+                task.Title?.Trim()
+                ?? string.Empty;
+
+            task.Description =
+                task.Description?.Trim()
+                ?? string.Empty;
+
             var normalizedTitle =
-                task.Title.Trim().ToLower();
+                task.Title.ToLower();
 
             var normalizedDescription =
-                (task.Description ?? string.Empty)
-                    .Trim()
-                    .ToLower();
+                task.Description.ToLower();
+
+            var dueDateUtc =
+                DateTime.SpecifyKind(
+                    task.DueDate.Date,
+                    DateTimeKind.Utc);
+
+            var nextDateUtc =
+                dueDateUtc.AddDays(1);
+
+            task.DueDate = dueDateUtc;
 
             var duplicateTask =
-                _context.Tasks.Any(t =>
+                await _context.Tasks.AnyAsync(t =>
                     t.UserId == userId &&
                     t.Title.ToLower() == normalizedTitle &&
                     t.Description.ToLower() == normalizedDescription &&
-                    t.DueDate.Date == task.DueDate.Date &&
+                    t.DueDate >= dueDateUtc &&
+                    t.DueDate < nextDateUtc &&
                     t.ProjectId == task.ProjectId);
 
             if (duplicateTask)
