@@ -122,6 +122,13 @@
             background: #4338ca;
         }
 
+        .create-btn:disabled {
+            color: #ffffff;
+            background: #6366f1;
+            cursor: not-allowed;
+            opacity: .75;
+        }
+
     @@media (max-width: 767px) {
 
         .create-task-page {
@@ -179,7 +186,8 @@
 
         <form asp-controller="Task"
               asp-action="Create"
-              method="post">
+              method="post"
+              id="createTaskForm">
 
             @Html.AntiForgeryToken()
 
@@ -383,11 +391,15 @@
 
 
                 <button type="submit"
-                        class="btn create-btn">
+                        class="btn create-btn"
+                        id="createTaskButton">
 
-                    <i class="bi bi-plus-lg me-2"></i>
+                    <i class="bi bi-plus-lg me-2"
+                       id="createTaskIcon"></i>
 
-                    Create task
+                    <span id="createTaskButtonText">
+                        Create task
+                    </span>
 
                 </button>
 
@@ -410,6 +422,10 @@
 
     <script>
 
+        document.addEventListener(
+        "DOMContentLoaded",
+        function () {
+
         flatpickr("#datePicker", {
 
         dateFormat: "Y-m-d",
@@ -417,6 +433,64 @@
         minDate: "today",
 
         disableMobile: true
+
+        });
+
+
+        const createTaskForm =
+        document.getElementById(
+        "createTaskForm");
+
+        const createTaskButton =
+        document.getElementById(
+        "createTaskButton");
+
+        const createTaskButtonText =
+        document.getElementById(
+        "createTaskButtonText");
+
+        const createTaskIcon =
+        document.getElementById(
+        "createTaskIcon");
+
+
+        let isSubmitting = false;
+
+
+        createTaskForm.addEventListener(
+        "submit",
+        function (event) {
+
+        if (isSubmitting) {
+
+        event.preventDefault();
+
+        return false;
+
+        }
+
+
+        if (!createTaskForm.checkValidity()) {
+
+        return;
+
+        }
+
+
+        isSubmitting = true;
+
+
+        createTaskButton.disabled = true;
+
+
+        createTaskButtonText.textContent =
+        "Creating...";
+
+
+        createTaskIcon.className =
+        "spinner-border spinner-border-sm me-2";
+
+        });
 
         });
 

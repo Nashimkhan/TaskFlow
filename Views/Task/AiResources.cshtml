@@ -1,0 +1,149 @@
+﻿@model List<TaskFlow.Models.AiSuggestedResource>
+
+@{
+    ViewData["Title"] = "AI Resources";
+
+    var taskTitle =
+        ViewBag.TaskTitle as string
+        ?? "Your Task";
+
+    int? projectId = ViewBag.ProjectId;
+}
+
+<div class="container py-5">
+
+    <div class="mx-auto"
+         style="max-width: 900px;">
+
+        <div class="text-center mb-5">
+
+            <div class="mb-3"
+                 style="font-size: 2.5rem;">
+                ✨
+            </div>
+
+            <h1 class="fw-bold mb-2">
+                AI Recommended Resources
+            </h1>
+
+            <p class="text-muted mb-0">
+                Selected resources for
+                <strong>@taskTitle</strong>
+            </p>
+
+        </div>
+
+
+        @if (Model != null && Model.Count > 0)
+        {
+            <div class="row g-4">
+
+                @foreach (var resource in Model)
+                {
+                    <div class="col-12">
+
+                        <div class="card
+                            border-0
+                            shadow-sm">
+
+                            <div class="card-body p-4">
+
+                                <div class="d-flex
+                                    flex-column
+                                    flex-md-row
+                                    justify-content-between
+                                    align-items-md-center
+                                    gap-3">
+
+                                    <div>
+
+                                        <span class="badge
+                                            text-bg-light
+                                            mb-2">
+
+                                            @resource.ResourceType
+
+                                        </span>
+
+                                        <h5 class="fw-bold mb-2">
+
+                                            @resource.Title
+
+                                        </h5>
+
+                                        <p class="text-muted mb-0">
+
+                                            @resource.Description
+
+                                        </p>
+
+                                    </div>
+
+
+                                    <a href="@resource.Url"
+                                       target="_blank"
+                                       rel="noopener noreferrer"
+                                       class="btn
+                                        btn-outline-primary
+                                        text-nowrap">
+
+                                        Open Resource ↗
+
+                                    </a>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+                }
+
+            </div>
+        }
+        else
+        {
+            <div class="alert
+                alert-light
+                border
+                text-center">
+
+                AI could not find trusted resources
+                for this task.
+
+            </div>
+        }
+
+
+        <div class="d-flex
+            justify-content-center
+            mt-5">
+
+            @if (projectId.HasValue)
+            {
+                <a asp-controller="Project"
+                   asp-action="Details"
+                   asp-route-id="@projectId.Value"
+                   class="btn btn-primary">
+
+                    Continue to Project
+
+                </a>
+            }
+            else
+            {
+                <a asp-controller="Task"
+                   asp-action="Index"
+                   class="btn btn-primary">
+
+                    Continue to Tasks
+
+                </a>
+            }
+
+        </div>
+
+    </div>
+
+</div>

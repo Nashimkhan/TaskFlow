@@ -400,6 +400,15 @@
 
                             <div class="d-flex gap-2">
 
+                                <a asp-controller="Task"
+                                   asp-action="AiResources"
+                                   asp-route-id="@task.Id"
+                                   class="btn btn-sm btn-outline-primary">
+
+                                    ✨ AI Resources
+
+                                </a>
+
                                 <a asp-action="Edit"
                                    asp-route-id="@task.Id"
                                    class="btn btn-outline-primary btn-sm flex-fill">

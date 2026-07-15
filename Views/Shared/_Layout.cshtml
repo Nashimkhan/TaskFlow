@@ -6,32 +6,32 @@
 
 <head>
 
-    <meta charset="utf-8"/>
+    <meta charset="utf-8" />
 
     <meta name="viewport"
-          content="width=device-width, initial-scale=1"/>
+          content="width=device-width, initial-scale=1" />
 
     <title>@ViewData["Title"] - TaskFlow</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-          rel="stylesheet"/>
+          rel="stylesheet" />
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css"
-          rel="stylesheet"/>
+          rel="stylesheet" />
 
     <link rel="preconnect"
-          href="https://fonts.googleapis.com"/>
+          href="https://fonts.googleapis.com" />
 
     <link rel="preconnect"
           href="https://fonts.gstatic.com"
-          crossorigin/>
+          crossorigin />
 
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
-          rel="stylesheet"/>
+          rel="stylesheet" />
 
     <link href="~/css/site.css"
           rel="stylesheet"
-          asp-append-version="true"/>
+          asp-append-version="true" />
 
 </head>
 
@@ -64,7 +64,7 @@ TaskFlow
 <div class="collapse navbar-collapse"
      id="navbar">
 
-@if(User.Identity?.IsAuthenticated==true)
+@if (User.Identity?.IsAuthenticated == true)
 {
 
 <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-2">
@@ -105,7 +105,7 @@ AI Planner
 
 </li>
 
-@if(User.IsInRole("Admin"))
+@if (User.IsInRole("Admin"))
 {
 
 <li class="nav-item">
@@ -131,8 +131,8 @@ Admin
 <div class="avatar">
 
 @(string.IsNullOrWhiteSpace(User.Identity?.Name)
-?"?"
-:User.Identity.Name.Substring(0,1).ToUpper())
+    ? "?"
+    : User.Identity.Name.Substring(0, 1).ToUpper())
 
 </div>
 
@@ -168,7 +168,7 @@ Account
 
 <li>
 
-<hr class="dropdown-divider"/>
+<hr class="dropdown-divider" />
 
 </li>
 
@@ -243,41 +243,65 @@ Get Started
 
 </header>
 
+
 <main class="page-content">
 
 <div class="container">
 
-@if(TempData["Success"]!=null)
+
+@if (TempData["Success"] != null)
 {
 
-<div class="alert alert-success alert-dismissible fade show shadow-sm">
+<div class="alert
+            alert-success
+            alert-dismissible
+            fade
+            show
+            shadow-sm
+            taskflow-auto-alert"
+     role="alert">
 
 <i class="bi bi-check-circle-fill me-2"></i>
 
 @TempData["Success"]
 
-<button class="btn-close"
-        data-bs-dismiss="alert"></button>
+<button type="button"
+        class="btn-close"
+        data-bs-dismiss="alert"
+        aria-label="Close">
+</button>
 
 </div>
 
 }
 
-@if(TempData["Error"]!=null)
+
+@if (TempData["Error"] != null)
 {
 
-<div class="alert alert-danger alert-dismissible fade show shadow-sm">
+<div class="alert
+            alert-danger
+            alert-dismissible
+            fade
+            show
+            shadow-sm
+            taskflow-auto-alert"
+     role="alert">
 
 <i class="bi bi-exclamation-circle-fill me-2"></i>
 
 @TempData["Error"]
 
-<button class="btn-close"
-        data-bs-dismiss="alert"></button>
+<button type="button"
+        class="btn-close"
+        data-bs-dismiss="alert"
+        aria-label="Close">
+</button>
 
 </div>
 
 }
+
 
 @RenderBody()
 
@@ -285,11 +309,16 @@ Get Started
 
 </main>
 
+
 <footer class="border-top py-4 mt-5">
 
 <div class="container">
 
-<div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+<div class="d-flex
+            justify-content-between
+            align-items-center
+            flex-wrap
+            gap-3">
 
 <div class="text-muted small">
 
@@ -309,12 +338,53 @@ Built with ASP.NET Core MVC • PostgreSQL • AI
 
 </footer>
 
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 <script src="~/js/site.js"
         asp-append-version="true"></script>
 
-@await RenderSectionAsync("Scripts", required:false)
+
+<script>
+
+    document.addEventListener(
+        "DOMContentLoaded",
+        function () {
+
+            const alerts =
+                document.querySelectorAll(
+                    ".taskflow-auto-alert");
+
+            alerts.forEach(function (alertElement) {
+
+                setTimeout(function () {
+
+                    if (!document.body.contains(
+                            alertElement)) {
+
+                        return;
+
+                    }
+
+                    const alert =
+                        bootstrap.Alert.getOrCreateInstance(
+                            alertElement);
+
+                    alert.close();
+
+                }, 4000);
+
+            });
+
+        });
+
+</script>
+
+
+@await RenderSectionAsync(
+    "Scripts",
+    required: false)
+
 
 </body>
 

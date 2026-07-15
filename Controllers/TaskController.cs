@@ -122,12 +122,50 @@ namespace TaskFlow.Controllers
             if (!ModelState.IsValid)
             {
                 ViewBag.ProjectId = task.ProjectId;
+
                 return View(task);
+            }
+
+            var userId = GetUserId();
+
+            var normalizedTitle =
+                task.Title.Trim().ToLower();
+
+            var normalizedDescription =
+                (task.Description ?? string.Empty)
+                    .Trim()
+                    .ToLower();
+
+            var duplicateTask =
+                _context.Tasks.Any(t =>
+                    t.UserId == userId &&
+                    t.Title.ToLower() == normalizedTitle &&
+                    t.Description.ToLower() == normalizedDescription &&
+                    t.DueDate.Date == task.DueDate.Date &&
+                    t.ProjectId == task.ProjectId);
+
+            if (duplicateTask)
+            {
+                TempData["Error"] =
+                    "This task already exists.";
+
+                if (task.ProjectId.HasValue)
+                {
+                    return RedirectToAction(
+                        "Details",
+                        "Project",
+                        new
+                        {
+                            id = task.ProjectId.Value
+                        });
+                }
+
+                return RedirectToAction("Index");
             }
 
             _taskService.CreateTask(
                 task,
-                GetUserId());
+                userId);
 
             TempData["Success"] =
                 "Task created successfully!";
@@ -137,10 +175,62 @@ namespace TaskFlow.Controllers
                 return RedirectToAction(
                     "Details",
                     "Project",
-                    new { id = task.ProjectId.Value });
+                    new
+                    {
+                        id = task.ProjectId.Value
+                    });
             }
 
             return RedirectToAction("Index");
+        }
+        [HttpGet]
+        public async Task<IActionResult> AiResources(int id)
+        {
+            var task =
+                _taskService.GetTaskById(
+                    id,
+                    GetUserId());
+
+            if (task == null)
+            {
+                return NotFound();
+            }
+
+            try
+            {
+                var resources =
+                    await _groqAiService
+                        .GenerateResourcesAsync(
+                            task.Title,
+                            task.Description);
+
+                ViewBag.TaskTitle = task.Title;
+
+                ViewBag.ProjectId = task.ProjectId;
+
+                return View(resources);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(
+                    $"AI resource error: {ex}");
+
+                TempData["Error"] =
+                    "Unable to generate AI resources right now.";
+
+                if (task.ProjectId.HasValue)
+                {
+                    return RedirectToAction(
+                        "Details",
+                        "Project",
+                        new
+                        {
+                            id = task.ProjectId.Value
+                        });
+                }
+
+                return RedirectToAction("Index");
+            }
         }
 
         public IActionResult Edit(int id)
