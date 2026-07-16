@@ -72,7 +72,7 @@ using (var scope = app.Services.CreateScope())
         services.GetRequiredService<
             RoleManager<IdentityRole>>();
 
-    db.Database.Migrate();
+    //db.Database.Migrate();
 
     string[] roles =
     {
